@@ -48,6 +48,8 @@ See existing examples under `src/components/Auth/`.
 
 - **Ask questions.** When the request is ambiguous, when there are real implementation choices with tradeoffs, or before any non-obvious / destructive action, use the `question` tool to confirm. Prefer one short batched question over back-and-forth guessing.
 - **Remember new learning.** When you discover something non-obvious about this repo — a gotcha, a convention, a fix, a command that wasn't documented — add it back to this file (or a clearly-scoped section) so future sessions benefit. Keep entries concise and high-signal; delete stale ones.
+- New App Router pages should include a `Metadata` export when the page has a meaningful title or description.
+
 - **Use available skills and MCPs.** Before writing code for a task that matches a listed skill (e.g. `shadcn`, `prisma-*`, `next-*`, `better-auth-*`, `vercel-react-*`, `zod`, etc.), load it with the `skill` tool. And MCPs that are directly relevant to this stack e.g. **`shadcn`** (local; component registry / audit) and **`better-auth`** (remote; auth setup). Use them when the task fits instead of guessing from training data.
 
 ## Stack at a glance
@@ -89,6 +91,10 @@ See existing examples under `src/components/Auth/`.
 - Tailwind v4: all config lives in `src/app/globals.css` via `@theme` and `@custom-variant`. PostCSS plugin is `@tailwindcss/postcss`. There is no `tailwind.config.ts` — do not create one.
 - `globals.css` imports `shadcn/tailwind.css`; removing it breaks the Base Luma design tokens.
 - Prettier: `singleAttributePerLine: true`, `bracketSameLine: true`, `experimentalTernaries: true`, and `prettier-plugin-tailwindcss` is enabled. New code matches (one prop per line; JSX closing bracket on the same line as the tag).
+
+## Zod v4 form schemas
+
+In this project's Zod v4 setup, email validation can use `z.email("Invalid email address")` directly rather than `z.string().email(...)`.
 
 ## shadcn / Base UI
 
