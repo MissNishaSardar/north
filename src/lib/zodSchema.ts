@@ -3,7 +3,7 @@ import { z } from "zod";
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean(),
 });
 
 const registerSchema = z
@@ -25,5 +25,5 @@ const registerSchema = z
   });
 
 export { loginSchema, registerSchema };
-export type LoginSchema = z.infer<typeof loginSchema>;
-export type RegisterSchema = z.infer<typeof registerSchema>;
+export type LoginType = z.infer<typeof loginSchema>;
+export type RegisterType = z.infer<typeof registerSchema>;

@@ -40,7 +40,15 @@ Each field goes through `Controller`:
 
 Submit: `<form onSubmit={handleSubmit(handler)} noValidate>`. Button disabled while submitting with icon toggle.
 
-See existing examples under `src/components/Auth/`.
+**Card-wrapper pattern**: Pages own the layout shell (`<Card>`, `<CardHeader>`, background gradient) while form components render only the `<form>` element with its children (`<CardContent>`, `<Separator>`, `<CardFooter>`). See `src/app/page.tsx` + `src/components/Form/Login.tsx`.
+
+**Icons inside inputs**: Wrap `<Input>` in a `<div className="relative">`, position the icon with absolute positioning, and add matching padding to the input.
+
+**Password visibility toggle**: A `useState<boolean>` controls the input `type` (`"text"` | `"password"`). The toggle button sits inside the relative wrapper with `tabIndex={-1}` and swaps `Eye`/`EyeOff` icons.
+
+
+
+See existing examples under `src/components/Form/`.
 
 <!-- END:form-patterns -->
 
@@ -96,6 +104,16 @@ See existing examples under `src/components/Auth/`.
 
 In this project's Zod v4 setup, email validation can use `z.email("Invalid email address")` directly rather than `z.string().email(...)`.
 
+**Gotcha — `.default()` creates resolver type mismatch.** When a field uses `.default()`, the Zod input type differs from the output type:
+- Input: `field?: type | undefined` (optional)
+- Output (`z.infer`): `field: type` (always present)
+
+Passing `<MyType>` to `useForm` with `zodResolver` causes a TypeScript error because the resolver's input type doesn't match `MyType`. Fixes:
+1. **Recommended**: Remove `.default()` if `defaultValues` in `useForm` already provides the default — input and output types stay identical.
+2. **Alternative**: Use `<z.input<typeof mySchema>>` as the `useForm` generic if the `.default()` is semantically needed on the schema.
+
+
+
 ## shadcn / Base UI
 
 - `components.json` sets `ui` → `@/components/shadcnui` (not the default `@/components/ui`). Add components with `bunx shadcn add ...`; they land in `src/components/shadcnui/`.
@@ -121,3 +139,7 @@ In this project's Zod v4 setup, email validation can use `z.email("Invalid email
 - `.env` is gitignored; `.env.example` is the committed template. Do not commit secrets.
 - `CHECKPOINT_DISABLE=1` is set to silence Prisma telemetry.
 - No CI workflows or pre-commit hooks exist. Pre-PR verification is `bun lint` then `bun run build` (see Verification above).
+
+
+
+

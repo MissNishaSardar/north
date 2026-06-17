@@ -2,12 +2,8 @@
 
 import { Button } from "@/components/shadcnui/button";
 import {
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/shadcnui/card";
 import { Checkbox } from "@/components/shadcnui/checkbox";
 import {
@@ -17,18 +13,22 @@ import {
   FieldLabel,
 } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
-import { loginSchema, type LoginSchema } from "@/lib/zodSchema";
+import { Separator } from "@/components/shadcnui/separator";
+import { loginSchema, type LoginType } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, LogIn, Mail } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<LoginSchema>({
+  } = useForm<LoginType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -38,63 +38,78 @@ function Login() {
     mode: "all",
   });
 
-  const onSubmit = async (values: LoginSchema) => {
+  const onSubmit = async (values: LoginType) => {
     console.log(values);
   };
 
   return (
-    <Card className="mx-auto w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-center text-2xl">Login</CardTitle>
-        <CardDescription>Enter your credentials to continue.</CardDescription>
-      </CardHeader>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate>
-        <CardContent className="flex flex-col gap-6">
-          <Controller
-            name="email"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <FieldContent>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate>
+      <CardContent className="flex flex-col gap-6">
+        <Controller
+          name="email"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+              <FieldContent>
+                <div className="relative">
+                  <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                   <Input
                     {...field}
                     id={field.name}
                     type="email"
                     placeholder="you@example.com"
                     autoComplete="email"
+                    className="pl-9"
                     aria-invalid={fieldState.invalid}
                   />
-                  <FieldError errors={[fieldState.error]} />
-                </FieldContent>
-              </Field>
-            )}
-          />
+                </div>
+                <FieldError errors={[fieldState.error]} />
+              </FieldContent>
+            </Field>
+          )}
+        />
 
-          <Controller
-            name="password"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <FieldContent>
+        <Controller
+          name="password"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+              <FieldContent>
+                <div className="relative">
+                  <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                   <Input
                     {...field}
                     id={field.name}
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     autoComplete="current-password"
+                    className="pr-9 pl-9"
                     aria-invalid={fieldState.invalid}
                   />
-                  <FieldError errors={[fieldState.error]} />
-                </FieldContent>
-              </Field>
-            )}
-          />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer transition-colors"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    tabIndex={-1}>
+                    {showPassword ?
+                      <EyeOff className="size-4" />
+                    : <Eye className="size-4" />}
+                  </button>
+                </div>
+                <FieldError errors={[fieldState.error]} />
+              </FieldContent>
+            </Field>
+          )}
+        />
 
+        <div className="flex items-center justify-between">
           <Controller
             name="rememberMe"
             control={control}
@@ -111,35 +126,45 @@ function Login() {
                 <FieldContent>
                   <FieldLabel
                     htmlFor={field.name}
-                    className="font-normal">
+                    className="cursor-pointer font-normal">
                     Remember me
                   </FieldLabel>
                 </FieldContent>
               </Field>
             )}
           />
-        </CardContent>
 
-        <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-            {isSubmitting ? "Signing in..." : "Sign in"}
-          </Button>
+          <Link
+            href="/forgot-password"
+            className="text-primary text-sm font-medium underline-offset-4 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+      </CardContent>
 
-          <p className="text-muted-foreground text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/register"
-              className="text-primary hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardFooter>
-      </form>
-    </Card>
+      <Separator className="mb-6" />
+
+      <CardFooter className="flex flex-col gap-4">
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}>
+          {isSubmitting ?
+            <Loader2 className="size-4 animate-spin" />
+          : <LogIn className="size-4" />}
+          {isSubmitting ? "Signing in..." : "Sign in"}
+        </Button>
+
+        <p className="text-muted-foreground text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/register"
+            className="text-primary font-medium underline-offset-4 hover:underline">
+            Create one
+          </Link>
+        </p>
+      </CardFooter>
+    </form>
   );
 }
 
