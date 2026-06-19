@@ -24,6 +24,19 @@ const registerSchema = z
     path: ["passwordConfirmation"],
   });
 
-export { loginSchema, registerSchema };
+const createTaskSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(120, "Title must be at most 120 characters"),
+  description: z.string().trim().max(500, "Description too long").optional(),
+  priority: z.enum(["low", "medium", "high"]),
+  status: z.enum(["pending", "in_progress", "completed"]),
+  dueDate: z.string().optional(),
+});
+
+export { loginSchema, registerSchema, createTaskSchema };
 export type LoginType = z.infer<typeof loginSchema>;
 export type RegisterType = z.infer<typeof registerSchema>;
+export type CreateTaskType = z.infer<typeof createTaskSchema>;
