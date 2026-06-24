@@ -1,10 +1,7 @@
 "use client";
 
 import { Button } from "@/components/shadcnui/button";
-import {
-  CardContent,
-  CardFooter,
-} from "@/components/shadcnui/card";
+import { CardContent, CardFooter } from "@/components/shadcnui/card";
 import { Checkbox } from "@/components/shadcnui/checkbox";
 import {
   Field,
@@ -14,14 +11,18 @@ import {
 } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { Separator } from "@/components/shadcnui/separator";
+import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginType } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, LogIn, Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 function Login() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -30,23 +31,33 @@ function Login() {
     formState: { isSubmitting },
   } = useForm<LoginType>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    },
+    defaultValues: { email: "", password: "", rememberMe: false },
     mode: "all",
   });
 
   const onSubmit = async (values: LoginType) => {
-    console.log(values);
+    const { error } = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      rememberMe: values.rememberMe,
+    });
+
+    if (error) {
+      toast.error(
+        error.message ?? error.statusText ?? "Invalid email or password.",
+      );
+      return;
+    }
+
+    toast.success("Welcome back!");
+    router.push("/tasks/create");
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate>
-      <CardContent className="flex flex-col gap-6">
+      <CardContent className="flex flex-col gap-6 pb-6">
         <Controller
           name="email"
           control={control}
@@ -134,11 +145,9 @@ function Login() {
             )}
           />
 
-          <Link
-            href="/forgot-password"
-            className="text-primary text-sm font-medium underline-offset-4 hover:underline">
+          <span className="text-muted-foreground w-full text-end text-sm">
             Forgot password?
-          </Link>
+          </span>
         </div>
       </CardContent>
 

@@ -10,14 +10,18 @@ import {
 } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { Separator } from "@/components/shadcnui/separator";
+import { authClient } from "@/lib/auth-client";
 import { registerSchema, type RegisterType } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail, User, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 function Register() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,14 +41,26 @@ function Register() {
   });
 
   const onSubmit = async (values: RegisterType) => {
-    console.log(values);
+    const { error } = await authClient.signUp.email({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      toast.error(error.message ?? error.statusText ?? "Registration failed.");
+      return;
+    }
+
+    toast.success("Account created! Welcome aboard.");
+    router.push("/");
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate>
-      <CardContent className="flex flex-col gap-6">
+      <CardContent className="flex flex-col gap-6 pb-6">
         <Controller
           name="name"
           control={control}

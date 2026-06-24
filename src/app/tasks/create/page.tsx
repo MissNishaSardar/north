@@ -5,7 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcnui/card";
+import { auth } from "@/lib/auth";
 import { ListTodo } from "lucide-react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,7 +16,15 @@ export const metadata: Metadata = {
   description: "Define your task details and set a deadline.",
 };
 
-const page = () => {
+const CreateTaskPage = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    redirect("/");
+  }
+
   return (
     <section className="grid h-dvh place-items-center">
       <Card className="ring-foreground/5 dark:ring-foreground/10 relative w-full max-w-md ring-1 backdrop-blur-sm">
@@ -35,4 +46,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default CreateTaskPage;

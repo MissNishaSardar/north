@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/shadcnui/button";
+import { Calendar } from "@/components/shadcnui/calendar";
 import { CardContent, CardFooter } from "@/components/shadcnui/card";
 import {
   Field,
@@ -10,26 +11,33 @@ import {
 } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcnui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcnui/select";
-import { Textarea } from "@/components/shadcnui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcnui/popover";
-import { Calendar } from "@/components/shadcnui/calendar";
 import { Separator } from "@/components/shadcnui/separator";
+import { Textarea } from "@/components/shadcnui/textarea";
 import { createTaskSchema, type CreateTaskType } from "@/lib/zodSchema";
+import { createTaskAction } from "@/server/actions/taskAction";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Check, Loader2, Target } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 function CreateTask() {
   const {
     control,
     handleSubmit,
+    setError,
+    reset,
     formState: { isSubmitting },
   } = useForm<CreateTaskType>({
     resolver: zodResolver(createTaskSchema),
@@ -44,12 +52,31 @@ function CreateTask() {
   });
 
   const onSubmit = async (values: CreateTaskType) => {
-    console.log(values);
+    const result = await createTaskAction(values);
+
+    if (!result.success) {
+      toast.error(result.error);
+
+      if (result.fieldErrors) {
+        for (const [field, messages] of Object.entries(result.fieldErrors)) {
+          setError(field as keyof CreateTaskType, {
+            message: messages.join(", "),
+          });
+        }
+      }
+
+      return;
+    }
+
+    toast.success(result.message);
+    reset();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <CardContent className="flex flex-col gap-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate>
+      <CardContent className="flex flex-col gap-6 pb-6">
         <Controller
           name="title"
           control={control}
@@ -99,18 +126,18 @@ function CreateTask() {
             name="priority"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="flex-1">
+              <Field
+                data-invalid={fieldState.invalid}
+                className="flex-1">
                 <FieldLabel htmlFor={field.name}>Priority</FieldLabel>
                 <FieldContent>
                   <Select
                     value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                    onValueChange={field.onChange}>
                     <SelectTrigger
                       id={field.name}
                       aria-invalid={fieldState.invalid}
-                      className="w-full"
-                    >
+                      className="w-full">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                     <SelectContent>
@@ -129,18 +156,18 @@ function CreateTask() {
             name="status"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="flex-1">
+              <Field
+                data-invalid={fieldState.invalid}
+                className="flex-1">
                 <FieldLabel htmlFor={field.name}>Status</FieldLabel>
                 <FieldContent>
                   <Select
                     value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                    onValueChange={field.onChange}>
                     <SelectTrigger
                       id={field.name}
                       aria-invalid={fieldState.invalid}
-                      className="w-full"
-                    >
+                      className="w-full">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -170,12 +197,12 @@ function CreateTask() {
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                       />
-                    }
-                  >
+                    }>
                     <CalendarIcon className="mr-2 size-4" />
                     {field.value ?
                       format(new Date(field.value), "PPP")
-                    : <span className="text-muted-foreground">Pick a date</span>}
+                    : <span className="text-muted-foreground">Pick a date</span>
+                    }
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
@@ -184,7 +211,7 @@ function CreateTask() {
                       onSelect={(date) =>
                         field.onChange(date ? date.toISOString() : "")
                       }
-                      />
+                    />
                   </PopoverContent>
                 </Popover>
                 <FieldError errors={[fieldState.error]} />
@@ -195,13 +222,11 @@ function CreateTask() {
       </CardContent>
 
       <Separator className="mb-6" />
-
       <CardFooter className="flex flex-col gap-4">
         <Button
           type="submit"
           className="w-full"
-          disabled={isSubmitting}
-        >
+          disabled={isSubmitting}>
           {isSubmitting ?
             <Loader2 className="size-4 animate-spin" />
           : <Check className="size-4" />}
