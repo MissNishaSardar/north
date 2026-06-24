@@ -33,6 +33,12 @@ const Header = () => {
           : user ?
             <>
               <Link
+                href="/tasks"
+                className="text-sm font-medium underline-offset-4 hover:underline">
+                My Tasks
+              </Link>
+
+              <Link
                 href="/tasks/create"
                 className="text-sm font-medium underline-offset-4 hover:underline">
                 New Task

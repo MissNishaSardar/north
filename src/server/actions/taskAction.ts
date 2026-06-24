@@ -15,7 +15,6 @@ export async function createTaskAction(
   data: CreateTaskType,
 ): Promise<TaskActionResult> {
   try {
-    // ── 1. Check authentication ────────────────────────────────────
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -27,7 +26,6 @@ export async function createTaskAction(
       };
     }
 
-    // ── 2. Validate input ──────────────────────────────────────────
     const parsed = createTaskSchema.safeParse(data);
 
     if (!parsed.success) {
@@ -50,7 +48,6 @@ export async function createTaskAction(
 
     const { title, description, priority, status, dueDate } = parsed.data;
 
-    // ── 3. Create task in database ─────────────────────────────────
     await prisma.task.create({
       data: {
         id: globalThis.crypto.randomUUID(),
@@ -63,11 +60,9 @@ export async function createTaskAction(
       },
     });
 
-    // ── 4. Success — revalidate and redirect ──────────────────────
     revalidatePath("/tasks/create");
     redirect("/tasks/create");
   } catch (error) {
-    // If redirect() was called, Next.js throws a special error — let it pass.
     if (error instanceof Error && "digest" in error) {
       throw error;
     }
@@ -79,4 +74,31 @@ export async function createTaskAction(
       error: "Something went wrong while creating your task. Please try again.",
     };
   }
+}
+
+export async function getTasksAction() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) return [];
+  return prisma.task.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getTaskAction(id: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) return null;
+  return prisma.task.findFirst({
+    where: { id, userId: session.user.id },
+  });
+}
+
+export async function deleteTaskAction(formData: FormData) {
+  const id = formData.get('id') as string;
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) return;
+  const task = await prisma.task.findFirst({ where: { id, userId: session.user.id } });
+  if (!task) return;
+  await prisma.task.delete({ where: { id } });
+  revalidatePath('/tasks');
 }
