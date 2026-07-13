@@ -19,3 +19,13 @@ export const registerSchema = z.object({
 });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  status: z.enum(["todo", "in_progress", "done"]),
+  priority: z.enum(["low", "medium", "high"]),
+  dueDate: z.string().optional(),
+});
+
+export type CreateTaskSchema = z.infer<typeof createTaskSchema>;

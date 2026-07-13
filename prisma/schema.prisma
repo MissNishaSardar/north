@@ -21,6 +21,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  tasks         Task[]
 
   @@unique([email])
   @@map("user")
@@ -72,4 +73,20 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("todo")
+  priority    String   @default("medium")
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("task")
 }

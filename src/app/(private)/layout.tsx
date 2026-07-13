@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+import { Sidebar } from "./_components/Sidebar";
 
 type PrivateLayoutProps = Readonly<{
   children: ReactNode;
@@ -16,7 +17,12 @@ const PrivateLayout = async ({ children }: PrivateLayoutProps) => {
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex flex-1 flex-col">{children}</div>
+    </div>
+  );
 };
 
 export default PrivateLayout;
