@@ -6,31 +6,11 @@ import { redirect } from "next/navigation";
 import { getTasksAction } from "@/server/task-actions";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/shadcnui/button";
+import { TaskRow } from "@/components/Tasks/TaskRow";
 
 export const metadata: Metadata = {
   title: "Tasks",
   description: "View all tasks",
-};
-
-const statusBadge: Record<string, string> = {
-  todo: "bg-muted text-muted-foreground",
-  in_progress: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  done: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-};
-
-const priorityBadge: Record<string, string> = {
-  low: "bg-muted text-muted-foreground",
-  medium: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-  high: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-};
-
-const formatDate = (date: Date | null) => {
-  if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
 };
 
 const TasksPage = async () => {
@@ -68,39 +48,7 @@ const TasksPage = async () => {
         ) : (
           <div className="grid gap-4">
             {tasks.map((task) => (
-              <Link
-                key={task.id}
-                href={`/tasks/${task.id}`}
-                className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted/50"
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">{task.title}</span>
-                  {task.description && (
-                    <span className="line-clamp-1 text-sm text-muted-foreground">
-                      {task.description}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                      statusBadge[task.status] ?? ""
-                    }`}
-                  >
-                    {task.status.replace("_", " ")}
-                  </span>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                      priorityBadge[task.priority] ?? ""
-                    }`}
-                  >
-                    {task.priority}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(task.dueDate)}
-                  </span>
-                </div>
-              </Link>
+              <TaskRow key={task.id} task={task} />
             ))}
           </div>
         )}

@@ -2,10 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { createTaskAction } from "@/server/task-actions";
+import { createTaskAction, updateTaskAction } from "@/server/task-actions";
 import { createTaskSchema, type CreateTaskSchema } from "@/lib/zodSchema";
 import { useRouter } from "next/navigation";
-import { Loader2Icon, PlusIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon, SaveIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { Button } from "@/components/shadcnui/button";
 import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
@@ -31,39 +31,71 @@ const priorityOptions = [
   { value: "high", label: "High" },
 ] as const;
 
-const CreateTaskForm = () => {
+const toDateString = (date: Date | null | undefined) => {
+  if (!date) return "";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+type TaskFormProps = {
+  task?: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    dueDate: Date | null;
+  };
+};
+
+const TaskForm = ({ task }: TaskFormProps) => {
   const { replace } = useRouter();
+  const isEdit = !!task;
 
   const {
     handleSubmit,
     control,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting, isValid, isDirty },
     reset,
   } = useForm<CreateTaskSchema>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      status: "todo",
-      priority: "medium",
-      dueDate: "",
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+      status: (task?.status as CreateTaskSchema["status"]) ?? "todo",
+      priority: (task?.priority as CreateTaskSchema["priority"]) ?? "medium",
+      dueDate: toDateString(task?.dueDate ?? null),
     },
     mode: "all",
   });
 
   const onSubmit = async (data: CreateTaskSchema) => {
     try {
-      const { task, error } = await createTaskAction(data);
+      if (isEdit && task) {
+        const { error } = await updateTaskAction(task.id, data);
 
-      if (error) {
-        toast.error(error);
-      } else if (task) {
-        toast.success("Task created!");
-        reset();
-        replace(`/tasks/${task.id}`);
+        if (error) {
+          toast.error(error);
+        } else {
+          toast.success("Task updated!");
+          replace(`/tasks/${task.id}`);
+        }
+      } else {
+        const { task: created, error } = await createTaskAction(data);
+
+        if (error) {
+          toast.error(error);
+        } else if (created) {
+          toast.success("Task created!");
+          reset();
+          replace(`/tasks/${created.id}`);
+        }
       }
     } catch {
-      toast.error("Failed to create task.");
+      toast.error(`Failed to ${isEdit ? "update" : "create"} task.`);
     }
   };
 
@@ -170,24 +202,22 @@ const CreateTaskForm = () => {
         )}
       />
 
-      <div className="flex gap-3">
-        <Button
-          className="flex-1"
-          type="submit"
-          disabled={isSubmitting || !isValid}
-        >
-          {isSubmitting ?
-            <>
-              <Loader2Icon className="animate-spin" /> Creating...
-            </>
-          : <>
-              <PlusIcon /> Create Task
-            </>
-          }
-        </Button>
-      </div>
+      <Button
+        className="w-full"
+        type="submit"
+        disabled={isSubmitting || (isEdit && !isDirty) || !isValid}
+      >
+        {isSubmitting ?
+          <>
+            <Loader2Icon className="animate-spin" /> {isEdit ? "Saving..." : "Creating..."}
+          </>
+        : <>
+            {isEdit ? <SaveIcon /> : <PlusIcon />} {isEdit ? "Update Task" : "Create Task"}
+          </>
+        }
+      </Button>
     </form>
   );
 };
 
-export { CreateTaskForm };
+export { TaskForm };

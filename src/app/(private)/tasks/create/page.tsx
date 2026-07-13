@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { CreateTaskForm } from "@/components/Tasks/CreateTaskForm";
+import { TaskForm } from "@/components/Tasks/TaskForm";
 import {
   Card,
   CardHeader,
@@ -36,7 +36,7 @@ const CreateTaskPage = async () => {
             <CardTitle>New Task</CardTitle>
           </CardHeader>
           <CardContent>
-            <CreateTaskForm />
+            <TaskForm />
           </CardContent>
         </Card>
       </main>

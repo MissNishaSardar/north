@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { Sidebar } from "./_components/Sidebar";
+import { Sidebar } from "../../components/Sidebar";
 
 type PrivateLayoutProps = Readonly<{
   children: ReactNode;

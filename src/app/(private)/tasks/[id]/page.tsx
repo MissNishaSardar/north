@@ -4,9 +4,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTaskByIdAction } from "@/server/task-actions";
-import { ArrowLeftIcon, CalendarIcon } from "lucide-react";
+import { ArrowLeftIcon, CalendarIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/shadcnui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcnui/card";
+import { DeleteTaskButton } from "@/components/Tasks/DeleteTaskButton";
 
 type TaskDetailPageProps = Readonly<{
   params: Promise<{ id: string }>;
@@ -70,12 +71,20 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
 
   return (
     <>
-      <header className="flex items-center border-b px-8 py-4">
+      <header className="flex items-center justify-between border-b px-8 py-4">
         <Link href="/tasks">
           <Button variant="ghost">
             <ArrowLeftIcon /> Back to Tasks
           </Button>
         </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/tasks/${task.id}/edit`}>
+            <Button variant="outline">
+              <PencilIcon /> Edit
+            </Button>
+          </Link>
+          <DeleteTaskButton taskId={task.id} taskTitle={task.title} variant="outline" />
+        </div>
       </header>
 
       <main className="flex-1 p-8">
