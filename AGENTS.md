@@ -42,6 +42,48 @@ Submit: `<form onSubmit={handleSubmit(handler)} noValidate>`. Button disabled wh
 
 See existing examples under `src/components/Auth/`.
 
+### Edit forms with redirect + `isDirty`
+
+Edit forms (e.g. `ProfileForm`) that live on a separate edit page should redirect back to the view page after saving:
+
+```typescript
+import { useRouter } from "next/navigation";
+
+const { push } = useRouter();
+
+const onSubmit = async (data) => {
+  const { error } = await updateAction(data);
+  if (error) {
+    toast.error(error);
+  } else {
+    toast.success("Updated!");
+    push("/view-page"); // redirect back to view page
+  }
+};
+```
+
+Submit button uses `isDirty` to stay disabled when no changes were made:
+
+```typescript
+<Button type="submit" disabled={isSubmitting || !isDirty || !isValid}>
+```
+
+`defaultValues` are pre-filled from the fetched data so `isDirty` correctly tracks user modifications.
+
+### TypeScript gotcha — `""` literal type in component props
+
+Do **not** use `""` (empty-string literal type) in component prop types or object type aliases for data coming from the database:
+
+```typescript
+// WRONG — breaks when Prisma returns actual strings like "John"
+type Props = { user: { name: "" } };
+
+// RIGHT — use standard string types
+type Props = { user: { name: string } };
+```
+
+The `""` literal type only accepts the empty string, but Prisma always returns `string` for text fields. Use `string` / `string | null` in prop types. The `?? ""` fallback pattern in `defaultValues` is fine for form initialization.
+
 <!-- END:form-patterns -->
 
 ## Agent behavior

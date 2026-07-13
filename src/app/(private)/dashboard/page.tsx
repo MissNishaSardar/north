@@ -16,7 +16,7 @@ import {
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import SignOutButton from "../../../components/Buttons/SignOutButton";
+import ProfileDropdown from "@/components/Profile/ProfileDropdown";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -72,7 +72,7 @@ const DashboardPage = async () => {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggleButton />
-          <SignOutButton />
+          <ProfileDropdown avatarSrc={session.user.image} />
         </div>
       </header>
 

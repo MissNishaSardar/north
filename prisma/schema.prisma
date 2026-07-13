@@ -17,6 +17,14 @@ model User {
   email         String
   emailVerified Boolean   @default(false)
   image         String?
+  bio           String?
+  phone         Int?
+  countryCode   String?
+  hobby         String?
+  gender        String?
+  education     String?
+  dateOfBirth   DateTime?
+  location      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
