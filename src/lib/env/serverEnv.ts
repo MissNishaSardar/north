@@ -10,6 +10,8 @@ export const serverEnv = createEnv({
       })
       .min(1, { error: "DATABASE_URL is required" }),
     CHECKPOINT_DISABLE: z.enum(["1", "0"]).optional(),
+    BETTER_AUTH_SECRET: z.string().min(32),
+    BETTER_AUTH_URL: z.string().url(),
   },
   experimental__runtimeEnv: process.env,
 });
