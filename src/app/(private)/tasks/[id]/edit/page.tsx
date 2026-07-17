@@ -37,38 +37,39 @@ const EditTaskPage = async ({ params }: EditTaskPageProps) => {
 
   if (error || !task) {
     return (
-      <>
-        <header className="flex items-center border-b px-8 py-4">
-          <Link href="/tasks">
-            <Button variant="ghost">
-              <ArrowLeftIcon /> Back to Tasks
-            </Button>
-          </Link>
-        </header>
-        <main className="flex flex-1 items-center justify-center">
-          <p className="text-lg text-muted-foreground">{error ?? "Task not found"}</p>
-        </main>
-      </>
+      <div className="flex flex-col items-center justify-center gap-4 p-8">
+        <Link href="/tasks">
+          <Button variant="ghost">
+            <ArrowLeftIcon /> Back to Tasks
+          </Button>
+        </Link>
+        <p className="text-muted-foreground text-lg">
+          {error ?? "Task not found"}
+        </p>
+      </div>
     );
   }
 
   return (
-    <>
-      <header className="flex items-center border-b px-8 py-4">
+    <div className="space-y-8 p-8">
+      <div className="flex items-center justify-between">
+        <Link href={`/tasks/${task.id}`}>
+          <Button variant="ghost">
+            <ArrowLeftIcon /> Back to Task
+          </Button>
+        </Link>
         <h1 className="text-2xl font-bold">Edit Task</h1>
-      </header>
-
-      <main className="flex-1 p-8">
-        <Card className="mx-auto max-w-lg">
-          <CardHeader>
-            <CardTitle>Edit &ldquo;{task.title}&rdquo;</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TaskForm task={task} />
-          </CardContent>
-        </Card>
-      </main>
-    </>
+        <div className="w-24" />
+      </div>
+      <Card className="mx-auto max-w-lg">
+        <CardHeader>
+          <CardTitle>Edit &ldquo;{task.title}&rdquo;</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TaskForm task={task} />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -120,6 +120,37 @@ export async function getTaskByIdAction(id: string) {
   }
 }
 
+export async function updateTaskStatusAction(id: string, status: string) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { error: "Unauthorized" };
+    }
+
+    const existing = await prisma.task.findFirst({
+      where: { id, userId: session.user.id },
+    });
+
+    if (!existing) {
+      return { error: "Task not found" };
+    }
+
+    await prisma.task.update({
+      where: { id },
+      data: { status },
+    });
+
+    return { error: null };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "Failed to update task status";
+    return { error: message };
+  }
+}
+
 export async function deleteTaskAction(id: string) {
   try {
     const session = await auth.api.getSession({

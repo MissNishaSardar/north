@@ -25,22 +25,17 @@ const CreateTaskPage = async () => {
   }
 
   return (
-    <>
-      <header className="flex items-center border-b px-8 py-4">
-        <h1 className="text-2xl font-bold">Create Task</h1>
-      </header>
-
-      <main className="flex-1 p-8">
-        <Card className="mx-auto max-w-lg">
-          <CardHeader>
-            <CardTitle>New Task</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TaskForm />
-          </CardContent>
-        </Card>
-      </main>
-    </>
+    <div className="space-y-8 p-8">
+      <h1 className="text-2xl font-bold">Create Task</h1>
+      <Card className="mx-auto max-w-lg">
+        <CardHeader>
+          <CardTitle>New Task</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TaskForm />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

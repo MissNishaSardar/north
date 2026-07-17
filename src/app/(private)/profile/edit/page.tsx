@@ -38,8 +38,8 @@ const EditProfilePage = async () => {
   }
 
   return (
-    <>
-      <header className="flex items-center justify-between border-b px-8 py-4">
+    <div className="space-y-8 p-8">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">Edit Profile</h1>
           <p className="text-muted-foreground text-sm">
@@ -51,41 +51,39 @@ const EditProfilePage = async () => {
             <ArrowLeftIcon /> Back to Profile
           </Button>
         </Link>
-      </header>
+      </div>
 
-      <main className="flex-1 space-y-8 p-8">
-        <Card className="mx-auto max-w-2xl">
-          <CardHeader>
-            <CardTitle>Avatar</CardTitle>
-          </CardHeader>
-          <UpdateAvatarForm prevImage={user.image} />
-        </Card>
+      <Card className="mx-auto max-w-2xl">
+        <CardHeader>
+          <CardTitle>Avatar</CardTitle>
+        </CardHeader>
+        <UpdateAvatarForm prevImage={user.image} />
+      </Card>
 
-        <Card className="mx-auto max-w-2xl">
-          <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProfileForm
-              user={{
-                name: user.name,
-                email: user.email,
-                image: user.image,
-                bio: user.bio,
-                phone: user.phone,
-                countryCode: user.countryCode,
-                hobby: user.hobby,
-                gender: user.gender,
-                education: user.education,
-                dateOfBirth: user.dateOfBirth,
-                location: user.location,
-                createdAt: user.createdAt,
-              }}
-            />
-          </CardContent>
-        </Card>
-      </main>
-    </>
+      <Card className="mx-auto max-w-2xl">
+        <CardHeader>
+          <CardTitle>Edit Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProfileForm
+            user={{
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              bio: user.bio,
+              phone: user.phone,
+              countryCode: user.countryCode,
+              hobby: user.hobby,
+              gender: user.gender,
+              education: user.education,
+              dateOfBirth: user.dateOfBirth,
+              location: user.location,
+              createdAt: user.createdAt,
+            }}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { getTaskByIdAction } from "@/server/task-actions";
 import { ArrowLeftIcon, CalendarIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/shadcnui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcnui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcnui/card";
 import { DeleteTaskButton } from "@/components/Tasks/DeleteTaskButton";
 
 type TaskDetailPageProps = Readonly<{
@@ -54,24 +59,22 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
 
   if (error || !task) {
     return (
-      <>
-        <header className="flex items-center border-b px-8 py-4">
-          <Link href="/tasks">
-            <Button variant="ghost">
-              <ArrowLeftIcon /> Back to Tasks
-            </Button>
-          </Link>
-        </header>
-        <main className="flex flex-1 items-center justify-center">
-          <p className="text-lg text-muted-foreground">{error ?? "Task not found"}</p>
-        </main>
-      </>
+      <div className="flex flex-col items-center justify-center gap-4 p-8">
+        <Link href="/tasks">
+          <Button variant="ghost">
+            <ArrowLeftIcon /> Back to Tasks
+          </Button>
+        </Link>
+        <p className="text-muted-foreground text-lg">
+          {error ?? "Task not found"}
+        </p>
+      </div>
     );
   }
 
   return (
-    <>
-      <header className="flex items-center justify-between border-b px-8 py-4">
+    <div className="space-y-8 p-8">
+      <div className="flex items-center justify-between">
         <Link href="/tasks">
           <Button variant="ghost">
             <ArrowLeftIcon /> Back to Tasks
@@ -83,60 +86,62 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
               <PencilIcon /> Edit
             </Button>
           </Link>
-          <DeleteTaskButton taskId={task.id} taskTitle={task.title} variant="outline" />
+          <DeleteTaskButton
+            taskId={task.id}
+            taskTitle={task.title}
+            variant="outline"
+          />
         </div>
-      </header>
+      </div>
 
-      <main className="flex-1 p-8">
-        <Card className="mx-auto max-w-2xl">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex flex-col gap-2">
-                <CardTitle className="text-2xl">{task.title}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                      statusStyles[task.status] ?? ""
-                    }`}
-                  >
-                    {task.status.replace("_", " ")}
-                  </span>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                      priorityStyles[task.priority] ?? ""
-                    }`}
-                  >
-                    {task.priority}
-                  </span>
-                </div>
+      <Card className="mx-auto max-w-2xl">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-2">
+              <CardTitle className="text-2xl">{task.title}</CardTitle>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                    statusStyles[task.status] ?? ""
+                  }`}>
+                  {task.status.replace("_", " ")}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                    priorityStyles[task.priority] ?? ""
+                  }`}>
+                  {task.priority}
+                </span>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {task.description && (
-              <div>
-                <h3 className="mb-2 text-sm font-medium text-muted-foreground">Description</h3>
-                <p className="text-sm whitespace-pre-wrap">{task.description}</p>
-              </div>
-            )}
-
-            {task.dueDate && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CalendarIcon className="size-4" />
-                <span>Due {formatDate(task.dueDate)}</span>
-              </div>
-            )}
-
-            <div className="border-t pt-4 text-xs text-muted-foreground">
-              <p>Created {formatDate(task.createdAt)}</p>
-              {task.updatedAt !== task.createdAt && (
-                <p>Updated {formatDate(task.updatedAt)}</p>
-              )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {task.description && (
+            <div>
+              <h3 className="text-muted-foreground mb-2 text-sm font-medium">
+                Description
+              </h3>
+              <p className="text-sm whitespace-pre-wrap">{task.description}</p>
             </div>
-          </CardContent>
-        </Card>
-      </main>
-    </>
+          )}
+
+          {task.dueDate && (
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <CalendarIcon className="size-4" />
+              <span>Due {formatDate(task.dueDate)}</span>
+            </div>
+          )}
+
+          <div className="text-muted-foreground border-t pt-4 text-xs">
+            <p>Created {formatDate(task.createdAt)}</p>
+            {task.updatedAt !== task.createdAt && (
+              <p>Updated {formatDate(task.updatedAt)}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
