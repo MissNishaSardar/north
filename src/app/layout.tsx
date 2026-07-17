@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import ThemeProvider from "@/components/Providers/ThemeProvider";
+import { TooltipProvider } from "@/components/shadcnui/tooltip";
 import { notoSansHeading, nunitoSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
 import { ReactNode } from "react";
 import "./globals.css";
 
@@ -33,7 +34,9 @@ const RootLayout = ({ children }: RootLayoutProps) => {
           attribute={"class"}
           defaultTheme="dark"
           enableSystem={false}>
-          <main className="mx-auto max-w-7xl">{children}</main>
+          <TooltipProvider>
+            <main className="">{children}</main>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

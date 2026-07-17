@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Loader2Icon, SaveIcon, PhoneIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { Button } from "@/components/shadcnui/button";
-import { Field, FieldError, FieldLabel, FieldContent } from "@/components/shadcnui/field";
+import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { Textarea } from "@/components/shadcnui/textarea";
 import {
@@ -96,8 +96,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="grid gap-6"
-      noValidate
-    >
+      noValidate>
       <Controller
         name="name"
         control={control}
@@ -139,23 +138,34 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
             name="countryCode"
             control={control}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="w-40 shrink-0" id="countryCode">
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}>
+                <SelectTrigger
+                  className="w-40 shrink-0"
+                  id="countryCode">
                   <SelectValue>
-                    {field.value ? (
+                    {field.value ?
                       <span className="flex items-center gap-2">
-                        {countryCodes.find((c) => c.countryCode === field.value)?.label.split(" ")[0]}
-                        {" "}
-                        {countryCodes.find((c) => c.countryCode === field.value)?.dialCode}
+                        {
+                          countryCodes
+                            .find((c) => c.countryCode === field.value)
+                            ?.label.split(" ")[0]
+                        }{" "}
+                        {
+                          countryCodes.find(
+                            (c) => c.countryCode === field.value,
+                          )?.dialCode
+                        }
                       </span>
-                    ) : (
-                      "Code"
-                    )}
+                    : "Code"}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {countryCodes.map((country) => (
-                    <SelectItem key={country.label} value={country.countryCode}>
+                    <SelectItem
+                      key={country.label}
+                      value={country.countryCode}>
                       {country.label} ({country.dialCode})
                     </SelectItem>
                   ))}
@@ -170,7 +180,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
             render={({ field, fieldState }) => (
               <div className="flex flex-1 flex-col gap-1">
                 <div className="relative flex-1">
-                  <PhoneIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <PhoneIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                   <Input
                     {...field}
                     id="phone"
@@ -187,7 +197,9 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
                     }}
                   />
                 </div>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </div>
             )}
           />
@@ -218,13 +230,19 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
           render={({ field }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
-              <Select value={field.value || ""} onValueChange={field.onChange}>
-                <SelectTrigger className="w-full" id={field.name}>
+              <Select
+                value={field.value || ""}
+                onValueChange={field.onChange}>
+                <SelectTrigger
+                  className="w-full"
+                  id={field.name}>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
                   {genderOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}>
                       {option.label}
                     </SelectItem>
                   ))}
@@ -291,8 +309,7 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
       <Button
         className="w-full"
         type="submit"
-        disabled={isSubmitting || !isDirty || !isValid}
-      >
+        disabled={isSubmitting || !isDirty || !isValid}>
         {isSubmitting ?
           <>
             <Loader2Icon className="animate-spin" /> Saving...

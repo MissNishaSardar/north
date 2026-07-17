@@ -1,4 +1,3 @@
-import ThemeToggleButton from "@/components/Buttons/ThemeToggleButton";
 import {
   Card,
   CardContent,
@@ -16,7 +15,6 @@ import {
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import ProfileDropdown from "@/components/Profile/ProfileDropdown";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -62,72 +60,55 @@ const DashboardPage = async () => {
   }
 
   return (
-    <>
-      <header className="flex items-center justify-between border-b px-8 py-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">
-            Welcome, {session.user.name ?? session.user.email}!
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggleButton />
-          <ProfileDropdown avatarSrc={session.user.image} />
-        </div>
-      </header>
+    <div className="space-y-8 p-8">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-muted-foreground text-sm font-medium">
+                  {stat.label}
+                </CardTitle>
+                <Icon className="text-muted-foreground size-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-muted-foreground text-xs">
+                  {stat.trend} from last month
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-      <main className="flex-1 space-y-8 p-8">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.label}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-muted-foreground text-sm font-medium">
-                    {stat.label}
-                  </CardTitle>
-                  <Icon className="text-muted-foreground size-4" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-muted-foreground text-xs">
-                    {stat.trend} from last month
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {recentActivity.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <li
-                    key={index}
-                    className="flex items-center gap-3">
-                    <div className="bg-muted flex size-8 items-center justify-center rounded-full">
-                      <Icon className="text-muted-foreground size-4" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{item.action}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {item.time}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </CardContent>
-        </Card>
-      </main>
-    </>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {recentActivity.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <li
+                  key={index}
+                  className="flex items-center gap-3">
+                  <div className="bg-muted flex size-8 items-center justify-center rounded-full">
+                    <Icon className="text-muted-foreground size-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.action}</p>
+                    <p className="text-muted-foreground text-xs">{item.time}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

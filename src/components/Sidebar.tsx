@@ -10,6 +10,18 @@ import {
   SettingsIcon,
 } from "lucide-react";
 
+import {
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  Sidebar as ShadcnSidebar,
+} from "@/components/shadcnui/sidebar";
+
 const navLinks = [
   { label: "Dashboard", icon: LayoutDashboardIcon, href: "/dashboard" },
   { label: "Tasks", icon: ListTodoIcon, href: "/tasks" },
@@ -22,30 +34,37 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-64 flex-col border-r p-6">
-      <div className="mb-8 text-xl font-bold">North</div>
-      <nav className="flex flex-col gap-2">
-        {navLinks.map((link) => {
-          const Icon = link.icon;
-          const active = pathname.startsWith(link.href) && link.href !== "#";
+    <ShadcnSidebar collapsible="icon">
+      <SidebarHeader>
+        <div className="px-3 py-2 text-xl font-bold">North</div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active =
+                  pathname.startsWith(link.href) && link.href !== "#";
 
-          return (
-            <Link
-              key={link.label}
-              href={link.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
-                active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              <Icon className="size-4" />
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+                return (
+                  <SidebarMenuItem key={link.label}>
+                    <SidebarMenuButton
+                      render={<Link href={link.href} />}
+                      isActive={active}
+                      tooltip={link.label}>
+                      <Icon />
+                      <span>{link.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </ShadcnSidebar>
   );
 };
 
