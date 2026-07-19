@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcnui/select";
+import DueDatePicker from "@/components/Tasks/DueDatePicker";
+import TimePicker from "@/components/Tasks/TimePicker";
 
 const statusOptions = [
   { value: "todo", label: "Todo" },
@@ -38,6 +40,14 @@ const toDateString = (date: Date | null | undefined) => {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+const toTimeString = (date: Date | null | undefined) => {
+  if (!date) return "";
+  const d = new Date(date);
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
 };
 
 type TaskFormProps = {
@@ -68,6 +78,7 @@ const TaskForm = ({ task }: TaskFormProps) => {
       status: (task?.status as CreateTaskSchema["status"]) ?? "todo",
       priority: (task?.priority as CreateTaskSchema["priority"]) ?? "medium",
       dueDate: toDateString(task?.dueDate ?? null),
+      dueTime: toTimeString(task?.dueDate ?? null),
     },
     mode: "all",
   });
@@ -185,22 +196,34 @@ const TaskForm = ({ task }: TaskFormProps) => {
         />
       </div>
 
-      <Controller
-        name="dueDate"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Due Date</FieldLabel>
-            <Input
-              {...field}
-              id={field.name}
-              type="date"
-              aria-invalid={fieldState.invalid}
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <Controller
+          name="dueDate"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Due Date</FieldLabel>
+              <DueDatePicker
+                value={field.value}
+                onChange={field.onChange}
+                id={field.name}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="dueTime"
+          control={control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor="due-time">Due Time</FieldLabel>
+              <TimePicker value={field.value} onChange={field.onChange} />
+            </Field>
+          )}
+        />
+      </div>
 
       <Button
         className="w-full"

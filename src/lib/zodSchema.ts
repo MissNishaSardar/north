@@ -26,6 +26,7 @@ export const createTaskSchema = z.object({
   status: z.enum(["todo", "in_progress", "done"]),
   priority: z.enum(["low", "medium", "high"]),
   dueDate: z.string().optional(),
+  dueTime: z.string().optional(),
 });
 
 export type CreateTaskSchema = z.infer<typeof createTaskSchema>;
@@ -43,3 +44,19 @@ export const updateProfileSchema = z.object({
 });
 
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+});
+
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;

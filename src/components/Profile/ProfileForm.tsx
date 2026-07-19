@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcnui/select";
+import DateOfBirthPicker from "@/components/Profile/DateOfBirthPicker";
 import { countryCodes } from "@/components/Profile/countries";
 
 const genderOptions = [
@@ -277,11 +278,10 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>Date of Birth</FieldLabel>
-              <Input
-                {...field}
+              <DateOfBirthPicker
+                value={field.value}
+                onChange={field.onChange}
                 id={field.name}
-                type="date"
-                aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>

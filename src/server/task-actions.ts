@@ -23,7 +23,7 @@ export async function createTaskAction(data: CreateTaskSchema) {
         description: parsed.description ?? null,
         status: parsed.status,
         priority: parsed.priority,
-        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : null,
+        dueDate: parsed.dueDate ? new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`) : null,
         userId: session.user.id,
       },
     });
@@ -84,7 +84,7 @@ export async function updateTaskAction(id: string, data: CreateTaskSchema) {
         description: parsed.description ?? null,
         status: parsed.status,
         priority: parsed.priority,
-        dueDate: parsed.dueDate ? new Date(parsed.dueDate) : null,
+        dueDate: parsed.dueDate ? new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`) : null,
       },
     });
 

@@ -136,6 +136,15 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 
 - `components.json` sets `ui` → `@/components/shadcnui` (not the default `@/components/ui`). Add components with `bunx shadcn add ...`; they land in `src/components/shadcnui/`.
 - The shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share the Base Luma styling.
+- **Base UI `render` prop**: When composing shadcn components that wrap Base UI primitives (e.g. `PopoverTrigger` + `Button`), use the `render` prop instead of nesting:
+  ```tsx
+  // WRONG — creates nested <button> elements
+  <PopoverTrigger><Button>...</Button></PopoverTrigger>
+
+  // RIGHT — Base UI clones Button and merges handlers
+  <PopoverTrigger render={<Button>...</Button>} />
+  ```
+- **Date picker**: Uses `Popover` + `Calendar` (built on `react-day-picker` v10 + `date-fns`). Add via `bunx shadcn add popover calendar`. Calendar uses `startMonth`/`endMonth` (Date objects) for year range, not `fromYear`/`toYear`.
 
 ## Path aliases (`tsconfig.json`)
 
@@ -150,6 +159,26 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 ## Package manager
 
 - `bun.lock` is committed; Bun is the primary workflow (`bun install`, `bun <script>`). npm works (engines pin `node >=24`, `npm >=11`) but the scripts and README are written around `bun`.
+
+## Header back navigation
+
+Place page-specific back links in the app header via `BreadcrumbNav` (`src/components/BreadcrumbNav.tsx`). It reads `usePathname()` and maps routes to back-link configs (exact match or regex pattern). Added after `SidebarTrigger` in `src/app/(private)/layout.tsx`.
+
+## Relative timestamps
+
+Use `Intl.RelativeTimeFormat` (no dependency) for timestamps < 24h, fall back to `Intl.DateTimeFormat` after:
+```typescript
+const formatRelativeTime = (date: Date | null) => {
+  if (!date) return null;
+  const diffMs = Date.now() - new Date(date).getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 24) {
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    // check seconds, then minutes, then hours
+  }
+  return formatDate(date); // full date fallback
+};
+```
 
 ## Misc
 

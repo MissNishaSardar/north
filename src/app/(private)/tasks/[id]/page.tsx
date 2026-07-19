@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTaskByIdAction } from "@/server/task-actions";
-import { ArrowLeftIcon, CalendarIcon, PencilIcon } from "lucide-react";
+import { CalendarIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/shadcnui/button";
 import {
   Card,
@@ -42,7 +42,28 @@ const formatDate = (date: Date | null) => {
     month: "long",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   }).format(new Date(date));
+};
+
+const formatRelativeTime = (date: Date | null) => {
+  if (!date) return null;
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(date).getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  if (diffHours < 24) {
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffSeconds = Math.floor(diffMs / 1000);
+
+    if (diffSeconds < 60) return rtf.format(-diffSeconds, "second");
+    if (diffMinutes < 60) return rtf.format(-diffMinutes, "minute");
+    return rtf.format(-diffHours, "hour");
+  }
+
+  return formatDate(date);
 };
 
 const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
@@ -60,11 +81,6 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
   if (error || !task) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8">
-        <Link href="/tasks">
-          <Button variant="ghost">
-            <ArrowLeftIcon /> Back to Tasks
-          </Button>
-        </Link>
         <p className="text-muted-foreground text-lg">
           {error ?? "Task not found"}
         </p>
@@ -74,12 +90,7 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
 
   return (
     <div className="space-y-8 p-8">
-      <div className="flex items-center justify-between">
-        <Link href="/tasks">
-          <Button variant="ghost">
-            <ArrowLeftIcon /> Back to Tasks
-          </Button>
-        </Link>
+      <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
           <Link href={`/tasks/${task.id}/edit`}>
             <Button variant="outline">
@@ -134,9 +145,9 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
           )}
 
           <div className="text-muted-foreground border-t pt-4 text-xs">
-            <p>Created {formatDate(task.createdAt)}</p>
+            <p>Created {formatRelativeTime(task.createdAt)}</p>
             {task.updatedAt !== task.createdAt && (
-              <p>Updated {formatDate(task.updatedAt)}</p>
+              <p>Updated {formatRelativeTime(task.updatedAt)}</p>
             )}
           </div>
         </CardContent>

@@ -85,3 +85,43 @@ export async function requireAuthAction() {
   }
   return session;
 }
+
+export async function forgotPasswordAction(formData: {
+  email: string;
+  redirectTo?: string;
+}) {
+  try {
+    const result = await auth.api.requestPasswordReset({
+      body: {
+        email: formData.email,
+        redirectTo: formData.redirectTo,
+      },
+      headers: await headers(),
+    });
+
+    return { status: result.status, message: result.message, error: null };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to send reset email";
+    return { status: false, message, error: message };
+  }
+}
+
+export async function resetPasswordAction(formData: {
+  newPassword: string;
+  token: string;
+}) {
+  try {
+    const result = await auth.api.resetPassword({
+      body: {
+        newPassword: formData.newPassword,
+        token: formData.token,
+      },
+      headers: await headers(),
+    });
+
+    return { status: result.status, error: null };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Password reset failed";
+    return { status: false, error: message };
+  }
+}

@@ -1,6 +1,5 @@
 import { ProfileForm } from "@/components/Profile/ProfileForm";
 import UpdateAvatarForm from "@/components/Profile/UpdateAvatarForm";
-import { Button } from "@/components/shadcnui/button";
 import {
   Card,
   CardContent,
@@ -9,10 +8,8 @@ import {
 } from "@/components/shadcnui/card";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/database/dbClient";
-import { ArrowLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -39,18 +36,11 @@ const EditProfilePage = async () => {
 
   return (
     <div className="space-y-8 p-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Edit Profile</h1>
-          <p className="text-muted-foreground text-sm">
-            Update your personal information
-          </p>
-        </div>
-        <Link href="/profile">
-          <Button variant="outline">
-            <ArrowLeftIcon /> Back to Profile
-          </Button>
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold">Edit Profile</h1>
+        <p className="text-muted-foreground text-sm">
+          Update your personal information
+        </p>
       </div>
 
       <Card className="mx-auto max-w-2xl">
