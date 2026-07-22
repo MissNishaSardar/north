@@ -88,9 +88,9 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 
 ## Agent behavior
 
-- **Ask questions.** When the request is ambiguous, when there are real implementation choices with tradeoffs, or before any non-obvious / destructive action, use the `question` tool to confirm. Prefer one short batched question over back-and-forth guessing.
-- **Remember new learning.** When you discover something non-obvious about this repo — a gotcha, a convention, a fix, a command that wasn't documented — add it back to this file (or a clearly-scoped section) so future sessions benefit. Keep entries concise and high-signal; delete stale ones.
-- **Use available skills and MCPs.** Before writing code for a task that matches a listed skill (e.g. `shadcn`, `prisma-*`, `next-*`, `better-auth-*`, `vercel-react-*`, `zod`, etc.), load it with the `skill` tool. And MCPs that are directly relevant to this stack e.g. **`shadcn`** (local; component registry / audit) and **`better-auth`** (remote; auth setup). Use them when the task fits instead of guessing from training data.
+- **Ask questions.** When ambiguous or before destructive actions, use the `question` tool. Prefer one short batched question.
+- **Remember new learning.** Add non-obvious gotchas back to this file; delete stale entries.
+- **Use available skills and MCPs.** Before writing code, load relevant skills (`shadcn`, `prisma-*`, `next-*`, `better-auth-*`, `zod`). Use the `shadcn` and `better-auth` MCPs for component or auth setup instead of guessing.
 
 ## Stack at a glance
 
@@ -100,12 +100,22 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 - shadcn/ui with the `base-luma` style preset; primitives from `@base-ui/react` (not Radix)
 - `next-themes` (default `dark`, `enableSystem={false}`), `react-toastify`, `lucide-react`
 - `@t3-oss/env-nextjs` + Zod for env validation
+- `@dnd-kit/core` for Kanban board drag-and-drop
+- No test framework — `bun lint` + `bun run build` are the only verification
 
 ## Verification
 
 - **Primary check**: `bun lint` — runs `eslint` with `eslint-config-next` core-web-vitals + typescript.
-- **Secondary / type gate**: `bun run build`. There is no separate `typecheck` script and no test framework; TypeScript errors surface only during the build.
+- **Secondary / type gate**: `bun run build`. There is no separate `typecheck` script; TypeScript errors surface only during the build.
 - **Full prod check**: `bun prod` — `prisma generate && eslint && next build && next start`. Use before schema or env changes.
+
+## Proxy (replaces middleware.ts)
+
+- Next.js 16 renamed `middleware.ts` to `proxy.ts`. The file is `src/proxy.ts`.
+- Exports a named `proxy` function and a `config` object with `matcher`.
+- Currently guards `/dashboard` by checking `better-auth.session_token` cookie.
+- Only one proxy file per project; split logic into imported modules if needed.
+- Do not create a `middleware.ts` — it is deprecated.
 
 ## Prisma (Prisma 7, custom output)
 
@@ -118,6 +128,7 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 - `bun studio` runs headless (`--browser none`); open the printed URL in a browser manually.
 - `generated/**` is gitignored and excluded from ESLint. Do not hand-edit generated files.
 - `build` and `prod` scripts prepend `prisma generate` — running raw `next build` will fail with missing types if the client is stale.
+- **Phone gotcha**: `User.phone` is Prisma `Int`, not `String`. Cannot store leading zeros or numbers > 2.1B. Forms validate 10 digits and store separately from `countryCode`.
 
 ## Env validation (T3 env)
 
@@ -125,6 +136,25 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 - `serverEnv.ts` uses `experimental__runtimeEnv: process.env`. The `experimental__` prefix is required for non-Next-runtime access — keep it verbatim.
 - `next.config.ts` imports both env files **as side effects** at the top of the module to trigger validation at load time. Do not remove those imports; the rest of the app reads `serverEnv` / `clientEnv` from those modules.
 - New vars: add to `serverEnv.ts` (server) or `clientEnv.ts` (must be `NEXT_PUBLIC_*`) and mirror in `.env.example`.
+- `clientEnv.ts` is currently a stub (empty) — no client env vars are validated yet.
+
+## Better Auth
+
+- Server auth instance: `src/lib/auth.ts` — creates `betterAuth` with Prisma adapter + email/password.
+- Client auth instance: `src/lib/auth-client.ts` — `createAuthClient()` from `better-auth/react`.
+- API catch-all: `src/app/api/auth/[...all]/route.ts` re-exports `GET`/`POST` from `better-auth/next-js`.
+- Client components call `authClient.signIn.email()`, `authClient.signUp.email()`, etc. directly.
+- Server components/layouts call `auth.api.getSession()` from `src/lib/auth.ts` using `headers()`.
+- Private layout (`src/app/(private)/layout.tsx`) checks session server-side and redirects to `/login`.
+- Each server action in `src/server/` re-checks the session independently (belt-and-suspenders).
+- **Do not import from `src/server/auth-actions.ts`** — all 8 functions are unused; components use `authClient` directly.
+
+## Server actions
+
+- All in `src/server/` with `"use server"` directive.
+- Consistent return shape: `{ ..., error: null }` on success, `{ error: "message" }` on failure.
+- Client components destructure `const { error } = await action(data)` and show toast on error.
+- Task actions verify ownership (`findFirst({ where: { id, userId } })`) before any mutation.
 
 ## Styling
 
@@ -153,8 +183,8 @@ The `""` literal type only accepts the empty string, but Prisma always returns `
 
 ## Reserved directories
 
-- `src/server/` — server-only modules (server actions, anything importing `server-only`). Currently a `.gitkeep`.
-- `src/hooks/` — custom React hooks. Currently a `.gitkeep`.
+- `src/server/` — server-only modules (server actions, `"use server"` files). Currently holds `task-actions.ts`, `profile-actions.ts`, `auth-actions.ts` (unused), `updateAvatar.ts`.
+- `src/hooks/` — custom React hooks. Currently holds `use-mobile.ts`.
 
 ## Package manager
 
@@ -166,19 +196,12 @@ Place page-specific back links in the app header via `BreadcrumbNav` (`src/compo
 
 ## Relative timestamps
 
-Use `Intl.RelativeTimeFormat` (no dependency) for timestamps < 24h, fall back to `Intl.DateTimeFormat` after:
-```typescript
-const formatRelativeTime = (date: Date | null) => {
-  if (!date) return null;
-  const diffMs = Date.now() - new Date(date).getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 24) {
-    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    // check seconds, then minutes, then hours
-  }
-  return formatDate(date); // full date fallback
-};
-```
+Use `Intl.RelativeTimeFormat` (no dependency) for timestamps < 24h, fall back to `Intl.DateTimeFormat`. The logic is currently duplicated in `tasks/[id]/page.tsx` and `ViewProfile.tsx` — extract to `src/lib/` if adding a third use.
+
+## Known dead / unused code
+
+- `src/server/auth-actions.ts` — all 8 functions, zero callers
+- `src/components/Buttons/ToastButton.tsx` — demo button, no callers
 
 ## Misc
 
