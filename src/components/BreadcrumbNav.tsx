@@ -24,6 +24,14 @@ const backLinkPatterns: Array<{
       label: "Back to Task",
     }),
   },
+  {
+    pattern: /^\/tasks\/history$/,
+    getConfig: () => ({ href: "/tasks", label: "Back to Tasks" }),
+  },
+  {
+    pattern: /^\/tasks\/preview$/,
+    getConfig: () => ({ href: "/tasks", label: "Back to Tasks" }),
+  },
 ];
 
 const BreadcrumbNav = () => {
@@ -34,7 +42,9 @@ const BreadcrumbNav = () => {
     return (
       // @ts-expect-error - typedRoutes expects route literals, but values are dynamic
       <Link href={exact.href}>
-        <Button variant="ghost" className="gap-1">
+        <Button
+          variant="ghost"
+          className="gap-1">
           <ArrowLeftIcon className="size-4" />
           {exact.label}
         </Button>
@@ -49,7 +59,9 @@ const BreadcrumbNav = () => {
       return (
         // @ts-expect-error - typedRoutes expects literal, but href is dynamic
         <Link href={href}>
-          <Button variant="ghost" className="gap-1">
+          <Button
+            variant="ghost"
+            className="gap-1">
             <ArrowLeftIcon className="size-4" />
             {label}
           </Button>

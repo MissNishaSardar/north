@@ -23,7 +23,10 @@ export async function createTaskAction(data: CreateTaskSchema) {
         description: parsed.description ?? null,
         status: parsed.status,
         priority: parsed.priority,
-        dueDate: parsed.dueDate ? new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`) : null,
+        dueDate:
+          parsed.dueDate ?
+            new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`)
+          : null,
         userId: session.user.id,
       },
     });
@@ -46,7 +49,13 @@ export async function getTasksAction() {
     }
 
     const tasks = await prisma.task.findMany({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        NOT: {
+          dueDate: { lte: new Date() },
+          status: { notIn: ["done", "cancelled"] },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -84,7 +93,10 @@ export async function updateTaskAction(id: string, data: CreateTaskSchema) {
         description: parsed.description ?? null,
         status: parsed.status,
         priority: parsed.priority,
-        dueDate: parsed.dueDate ? new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`) : null,
+        dueDate:
+          parsed.dueDate ?
+            new Date(`${parsed.dueDate}T${parsed.dueTime ?? "00:00"}:00`)
+          : null,
       },
     });
 
@@ -147,6 +159,156 @@ export async function updateTaskStatusAction(id: string, status: string) {
   } catch (e) {
     const message =
       e instanceof Error ? e.message : "Failed to update task status";
+    return { error: message };
+  }
+}
+
+export async function getCompletedTasksAction() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { tasks: [], error: "Unauthorized" };
+    }
+
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+        OR: [
+          { status: "done", updatedAt: { lte: twoDaysAgo } },
+          { dismissedAt: { not: null } },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    return { tasks, error: null };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "Failed to fetch task history";
+    return { tasks: [], error: message };
+  }
+}
+
+export async function getExpiredTasksAction() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { tasks: [], error: "Unauthorized" };
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+        dueDate: { lte: new Date() },
+        status: { notIn: ["done", "cancelled"] },
+        dismissedAt: null,
+      },
+      orderBy: { dueDate: "asc" },
+    });
+
+    return { tasks, error: null };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "Failed to fetch expired tasks";
+    return { tasks: [], error: message };
+  }
+}
+
+export async function extendTaskDueDateAction(id: string, dueDate: Date) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { task: null, error: "Unauthorized" };
+    }
+
+    const existing = await prisma.task.findFirst({
+      where: { id, userId: session.user.id },
+    });
+
+    if (!existing) {
+      return { task: null, error: "Task not found" };
+    }
+
+    const task = await prisma.task.update({
+      where: { id },
+      data: { dueDate },
+    });
+
+    return { task, error: null };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "Failed to extend deadline";
+    return { task: null, error: message };
+  }
+}
+
+export async function cancelTaskAction(id: string) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { error: "Unauthorized" };
+    }
+
+    const existing = await prisma.task.findFirst({
+      where: { id, userId: session.user.id },
+    });
+
+    if (!existing) {
+      return { error: "Task not found" };
+    }
+
+    await prisma.task.update({
+      where: { id },
+      data: { status: "cancelled" },
+    });
+
+    return { error: null };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to cancel task";
+    return { error: message };
+  }
+}
+
+export async function dismissOverdueTaskAction(id: string) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return { error: "Unauthorized" };
+    }
+
+    const existing = await prisma.task.findFirst({
+      where: { id, userId: session.user.id },
+    });
+
+    if (!existing) {
+      return { error: "Task not found" };
+    }
+
+    await prisma.task.update({
+      where: { id },
+      data: { dismissedAt: new Date() },
+    });
+
+    return { error: null };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to dismiss task";
     return { error: message };
   }
 }

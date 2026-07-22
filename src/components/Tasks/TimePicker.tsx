@@ -4,6 +4,13 @@ import * as React from "react";
 import { ClockIcon } from "lucide-react";
 import { Button } from "@/components/shadcnui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcnui/select";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -20,17 +27,15 @@ const minutes = Array.from({ length: 12 }, (_, i) => ({
   label: String(i * 5).padStart(2, "0"),
 }));
 
-const periods = [
-  { value: "AM", label: "AM" },
-  { value: "PM", label: "PM" },
-];
-
 const to12Hour = (value: string) => {
   if (!value) return { hour: "", minute: "", period: "" };
   const [h, m] = value.split(":");
   const hour = parseInt(h, 10);
   const period = hour >= 12 ? "PM" : "AM";
-  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const hour12 =
+    hour === 0 ? 12
+    : hour > 12 ? hour - 12
+    : hour;
   return {
     hour: String(hour12).padStart(2, "0"),
     minute: m,
@@ -76,10 +81,13 @@ const TimePicker = ({ value, onChange }: TimePickerProps) => {
   const handlePeriodChange = (p: string) => {
     const result = to24Hour(hour || "12", minute || "00", p);
     if (result) onChange(result);
+    setOpen(false);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button
@@ -89,59 +97,75 @@ const TimePicker = ({ value, onChange }: TimePickerProps) => {
               !value && "text-muted-foreground",
             )}>
             <ClockIcon className="size-4" />
-            {value ?
-              formatDisplay(value)
-            : <span>Pick time</span>}
+            {value ? formatDisplay(value) : <span>Pick time</span>}
           </Button>
         }
       />
-      <PopoverContent className="w-auto p-2">
-        <div className="flex gap-1">
-          <div className="flex max-h-48 flex-col gap-0.5 overflow-y-auto">
-            {hours.map((h) => (
-              <Button
-                key={h.value}
-                variant={hour === h.value ? "default" : "ghost"}
-                size="sm"
-                className="min-w-10 shrink-0"
-                onClick={() => handleHourChange(h.value)}>
-                {h.label}
-              </Button>
-            ))}
-          </div>
+      <PopoverContent
+        className="w-auto p-3"
+        align="start">
+        <div className="flex items-center gap-2">
+          <Select
+            value={hour}
+            onValueChange={(v) => {
+              if (!v) return;
+              handleHourChange(v);
+              if (!value) setOpen(false);
+            }}>
+            <SelectTrigger className="w-16">
+              <SelectValue placeholder="--" />
+            </SelectTrigger>
+            <SelectContent>
+              {hours.map((h) => (
+                <SelectItem
+                  key={h.value}
+                  value={h.value}>
+                  {h.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div className="flex max-h-48 flex-col gap-0.5 overflow-y-auto">
-            {minutes.map((m) => (
-              <Button
-                key={m.value}
-                variant={minute === m.value ? "default" : "ghost"}
-                size="sm"
-                className="min-w-10 shrink-0"
-                onClick={() => handleMinuteChange(m.value)}>
-                {m.label}
-              </Button>
-            ))}
-          </div>
+          <span className="text-muted-foreground text-lg font-medium">:</span>
+
+          <Select
+            value={minute}
+            onValueChange={(v) => {
+              if (!v) return;
+              handleMinuteChange(v);
+              if (!value) setOpen(false);
+            }}>
+            <SelectTrigger className="w-16">
+              <SelectValue placeholder="--" />
+            </SelectTrigger>
+            <SelectContent>
+              {minutes.map((m) => (
+                <SelectItem
+                  key={m.value}
+                  value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="flex flex-col gap-0.5">
-            {periods.map((p) => (
-              <Button
-                key={p.value}
-                variant={period === p.value ? "default" : "ghost"}
-                size="sm"
-                className="min-w-14 shrink-0"
-                onClick={() => handlePeriodChange(p.value)}>
-                {p.label}
-              </Button>
-            ))}
+            <Button
+              size="sm"
+              variant={period === "AM" ? "default" : "ghost"}
+              onClick={() => handlePeriodChange("AM")}
+              className="h-6 min-w-10 px-2 text-xs">
+              AM
+            </Button>
+            <Button
+              size="sm"
+              variant={period === "PM" ? "default" : "ghost"}
+              onClick={() => handlePeriodChange("PM")}
+              className="h-6 min-w-10 px-2 text-xs">
+              PM
+            </Button>
           </div>
         </div>
-        <Button
-          className="mt-2 w-full"
-          size="sm"
-          onClick={() => setOpen(false)}>
-          Set Time
-        </Button>
       </PopoverContent>
     </Popover>
   );

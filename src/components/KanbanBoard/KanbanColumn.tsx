@@ -33,6 +33,7 @@ const KanbanColumn = ({ id, label, icon, tasks }: KanbanColumnProps) => {
           <KanbanCard
             key={task.id}
             task={task}
+            showCompleteButton={id === "in_progress"}
           />
         ))}
         {tasks.length === 0 && (

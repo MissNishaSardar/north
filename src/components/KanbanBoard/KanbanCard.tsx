@@ -2,6 +2,10 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { useRouter } from "next/navigation";
+import { CheckCircle2Icon, LoaderCircleIcon } from "lucide-react";
+import { toast } from "react-toastify";
+import { useState } from "react";
+import { updateTaskStatusAction } from "@/server/task-actions";
 import type { KanbanTask } from "./types";
 
 const priorityBadge: Record<string, string> = {
@@ -21,10 +25,16 @@ const formatDate = (date: Date | null) => {
 type KanbanCardProps = {
   task: KanbanTask;
   isDragOverlay?: boolean;
+  showCompleteButton?: boolean;
 };
 
-const KanbanCard = ({ task, isDragOverlay }: KanbanCardProps) => {
-  const { push } = useRouter();
+const KanbanCard = ({
+  task,
+  isDragOverlay,
+  showCompleteButton,
+}: KanbanCardProps) => {
+  const { push, refresh } = useRouter();
+  const [completing, setCompleting] = useState(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
@@ -40,6 +50,19 @@ const KanbanCard = ({ task, isDragOverlay }: KanbanCardProps) => {
     if (!isDragging) push(`/tasks/${task.id}`);
   };
 
+  const handleComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCompleting(true);
+    const { error } = await updateTaskStatusAction(task.id, "done");
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success("Task completed!");
+      refresh();
+    }
+    setCompleting(false);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -49,10 +72,27 @@ const KanbanCard = ({ task, isDragOverlay }: KanbanCardProps) => {
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      className={`bg-card focus-visible:ring-ring cursor-grab rounded-xl border p-3 text-sm shadow-sm transition-[box-shadow,opacity] focus-visible:ring-2 focus-visible:outline-none active:cursor-grabbing ${
+      className={`bg-card focus-visible:ring-ring relative cursor-grab rounded-xl border p-3 text-sm shadow-sm transition-[box-shadow,opacity] focus-visible:ring-2 focus-visible:outline-none active:cursor-grabbing ${
         isDragging ? "opacity-50 shadow-lg" : "hover:shadow-md"
       } ${isDragOverlay ? "shadow-xl" : ""}`}>
-      <div className="mb-2 font-medium">{task.title}</div>
+      {showCompleteButton && (
+        <button
+          type="button"
+          onClick={handleComplete}
+          disabled={completing}
+          className="text-muted-foreground hover:text-primary active:text-primary absolute top-2 right-2 rounded-full p-1 transition-colors"
+          title="Mark as done">
+          {completing ?
+            <LoaderCircleIcon className="size-4 animate-spin" />
+          : <CheckCircle2Icon className="size-4" />}
+        </button>
+      )}
+      <div className="mb-2 flex items-center gap-1.5 font-medium">
+        {task.status === "done" && (
+          <CheckCircle2Icon className="size-4 shrink-0 text-green-500" />
+        )}
+        <span className="truncate">{task.title}</span>
+      </div>
       <div className="flex items-center gap-2">
         {task.priority && (
           <span

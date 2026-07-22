@@ -9,12 +9,16 @@ type TaskRowTask = {
   status: string;
   priority: string;
   dueDate: Date | null;
+  dismissedAt: Date | null;
 };
 
 const statusBadge: Record<string, string> = {
   todo: "bg-muted text-muted-foreground",
   in_progress: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
   done: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  cancelled: "bg-muted text-muted-foreground line-through",
+  dismissed:
+    "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
 };
 
 const priorityBadge: Record<string, string> = {
@@ -41,13 +45,12 @@ const TaskRow = ({ task }: TaskRowProps) => {
 
   return (
     <div
-      className="flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted/50"
-      onClick={() => push(`/tasks/${task.id}`)}
-    >
+      className="hover:bg-muted/50 flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-colors"
+      onClick={() => push(`/tasks/${task.id}`)}>
       <div className="flex flex-col gap-1">
         <span className="font-medium">{task.title}</span>
         {task.description && (
-          <span className="line-clamp-1 text-sm text-muted-foreground">
+          <span className="text-muted-foreground line-clamp-1 text-sm">
             {task.description}
           </span>
         )}
@@ -55,19 +58,19 @@ const TaskRow = ({ task }: TaskRowProps) => {
       <div className="flex items-center gap-3">
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-            statusBadge[task.status] ?? ""
-          }`}
-        >
-          {task.status.replace("_", " ")}
+            task.dismissedAt ?
+              statusBadge.dismissed
+            : (statusBadge[task.status] ?? "")
+          }`}>
+          {task.dismissedAt ? "Dismissed" : task.status.replace("_", " ")}
         </span>
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
             priorityBadge[task.priority] ?? ""
-          }`}
-        >
+          }`}>
           {task.priority}
         </span>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {formatDate(task.dueDate)}
         </span>
       </div>

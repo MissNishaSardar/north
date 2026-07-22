@@ -88,15 +88,22 @@ const TaskDetailPage = async ({ params }: TaskDetailPageProps) => {
     );
   }
 
+  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  const isHistoryTask =
+    task.dismissedAt !== null ||
+    (task.status === "done" && new Date(task.updatedAt) <= twoDaysAgo);
+
   return (
     <div className="space-y-8 p-8">
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
-          <Link href={`/tasks/${task.id}/edit`}>
-            <Button variant="outline">
-              <PencilIcon /> Edit
-            </Button>
-          </Link>
+          {!isHistoryTask && (
+            <Link href={`/tasks/${task.id}/edit`}>
+              <Button variant="outline">
+                <PencilIcon /> Edit
+              </Button>
+            </Link>
+          )}
           <DeleteTaskButton
             taskId={task.id}
             taskTitle={task.title}

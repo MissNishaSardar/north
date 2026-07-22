@@ -90,6 +90,7 @@ model Task {
   status      String   @default("todo")
   priority    String   @default("medium")
   dueDate     DateTime?
+  dismissedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      String
