@@ -38,7 +38,10 @@ Path aliases: `@/*` → `./src/*`, `@generated/*` → `./generated/*`.
 
 ```
 src/
-  app/              # App Router (layout.tsx, page.tsx, globals.css)
+  app/              # App Router (layout.tsx, globals.css)
+    (public)/       # Route group: routes accessible without auth (homepage, sign-in)
+    (private)/      # Route group: gated by (private)/layout.tsx session check
+    api/            # API routes — keep at root, NOT inside route groups
   components/
     Layout/         # Header, ThemeToggleButton
     Providers/      # ThemeProvider (next-themes)
@@ -66,6 +69,7 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 - After adding/changing plugins, re-run: `bunx @better-auth/cli generate --config src/lib/auth.ts --output prisma/schema.prisma --yes` then `bun run migrate` (migrate script already runs `prisma generate` — required with the `prisma-client` generator; `migrate dev` alone does NOT regenerate it).
 - Better Auth config uses model names (`@@map`), not table names. Rate limiting is enabled with `storage: "database"` (adds the `RateLimit` model).
 - Verify: `GET /api/auth/ok` → `{"ok":true}`.
+- Route gating: `(private)/layout.tsx` checks `auth.api.getSession({ headers: await headers() })` and `redirect("/sign-in")`. Layout checks don't re-run on client navigation — use a `proxy.ts` (Next 16 middleware) optimistic check or per-page checks for hardened gating.
 
 ## Key restrictions
 
