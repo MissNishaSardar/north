@@ -2,9 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { z } from "zod";
 import prisma from "@/lib/dbClient/prisma";
 import { auth } from "@/lib/auth";
-import { taskSchema, taskType } from "@/lib/zodSchema";
+import {
+  taskSchema,
+  taskStatusSchema,
+  taskStatusType,
+  taskType,
+} from "@/lib/zodSchema";
 
 const getTaskUserId = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -95,6 +101,63 @@ export async function deleteTask(id: string) {
   if (task.count === 0) {
     throw new Error("Task not found");
   }
+
+  revalidatePath("/dashboard");
+}
+
+export async function updateTaskOrder(
+  taskId: string,
+  newStatus: taskStatusType,
+  newIndex: number
+) {
+  const userId = await getTaskUserId();
+  const parsedStatus = taskStatusSchema.safeParse(newStatus);
+  const parsedIndex = z.number().int().min(0).safeParse(newIndex);
+
+  if (!parsedStatus.success || !parsedIndex.success) {
+    throw new Error("Invalid task position");
+  }
+
+  const columnTasks = await prisma.task.findMany({
+    where: { userId },
+    select: { id: true, status: true, order: true },
+  });
+
+  const moved = columnTasks.find((task) => task.id === taskId);
+
+  if (!moved) {
+    throw new Error("Task not found");
+  }
+
+  const remaining = columnTasks.filter((task) => task.id !== taskId);
+  const columns: Record<taskStatusType, (typeof columnTasks)[number][]> = {
+    TODO: [],
+    IN_PROGRESS: [],
+    DONE: [],
+  };
+
+  for (const task of remaining) {
+    columns[task.status as taskStatusType].push(task);
+  }
+
+  columns[parsedStatus.data].splice(
+    Math.min(parsedIndex.data, columns[parsedStatus.data].length),
+    0,
+    { ...moved, status: parsedStatus.data }
+  );
+
+  const updates = (
+    Object.entries(columns) as [taskStatusType, (typeof columnTasks)[number][]][]
+  ).flatMap(([status, tasks]) =>
+    tasks.map((task, index) =>
+      prisma.task.update({
+        where: { id: task.id },
+        data: { status, order: index },
+      })
+    )
+  );
+
+  await prisma.$transaction(updates);
 
   revalidatePath("/dashboard");
 }

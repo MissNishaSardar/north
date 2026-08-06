@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/shadcnui/button";
 import {
@@ -60,6 +61,7 @@ const TaskDialog = ({
   trigger?: React.ReactElement;
 }) => {
   const [open, setOpen] = React.useState(false);
+  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -98,6 +100,7 @@ const TaskDialog = ({
         type: "success",
       });
       setOpen(false);
+      router.refresh();
     } catch (error) {
       toast.add({
         title: "Failed to save task",
@@ -117,6 +120,7 @@ const TaskDialog = ({
       await deleteTask(task.id);
       toast.add({ title: "Task deleted", type: "success" });
       setOpen(false);
+      router.refresh();
     } catch (error) {
       toast.add({
         title: "Failed to delete task",
