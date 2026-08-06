@@ -70,6 +70,7 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 - Better Auth config uses model names (`@@map`), not table names. Rate limiting is enabled with `storage: "database"` (adds the `RateLimit` model).
 - Verify: `GET /api/auth/ok` → `{"ok":true}`.
 - Route gating: `(private)/layout.tsx` checks `auth.api.getSession({ headers: await headers() })` and `redirect("/sign-in")`. Layout checks don't re-run on client navigation — use a `proxy.ts` (Next 16 middleware) optimistic check or per-page checks for hardened gating.
+- Emails: `sendResetPassword` currently logs the reset URL via `console.log` (mock). Swap for a real provider when one is added.
 
 ## Key restrictions
 
@@ -78,7 +79,7 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 
 ## Form patterns
 
-Schemas in `src/lib/zodSchema.ts` — export both schema and `type X = z.infer<typeof xSchema>`.
+Schemas in `src/lib/zodSchema.ts` — export schema and type as `nameSchema`/`nameType` pairs (e.g. `signinSchema`/`signinType`). Auth forms live in `src/components/Auth/` (client components); the shadcn `Card` wrapper + `Metadata` export live on the server page.
 
 Components use `"use client"`, `react-hook-form` + `@hookform/resolvers/zod`, and shadcn primitives:
 
