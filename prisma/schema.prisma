@@ -22,6 +22,12 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  tasks         Task[]
+
+  role       String  @default("user") // "user" | "admin" (managed by better-auth admin plugin)
+  banned     Boolean @default(false) // (managed by better-auth admin plugin)
+  banReason  String?
+  banExpires DateTime?
 
   @@unique([email])
   @@map("user")
@@ -37,6 +43,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
 
   @@unique([token])
   @@index([userId])
@@ -83,4 +91,32 @@ model RateLimit {
 
   @@unique([key])
   @@map("rateLimit")
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  status    Status   @default(TODO)
+  priority  Priority @default(MEDIUM)
+  dueDate   DateTime?
+  order     Int      @default(0)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("task")
 }

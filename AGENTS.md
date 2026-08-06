@@ -66,10 +66,12 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 
 - `src/lib/auth.ts` uses `prismaAdapter` from `better-auth/adapters/prisma` with the existing `dbClient` singleton (libSQL driver adapter). Do NOT use raw `bun:sqlite`/`new Database()` — creates a separate DB and breaks the Prisma singleton.
 - Env via `serverEnv`: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (normalized without trailing slash). Never hardcode `baseURL` in auth.ts.
-- After adding/changing plugins, re-run: `bunx @better-auth/cli generate --config src/lib/auth.ts --output prisma/schema.prisma --yes` then `bun run migrate` (migrate script already runs `prisma generate` — required with the `prisma-client` generator; `migrate dev` alone does NOT regenerate it).
-- Better Auth config uses model names (`@@map`), not table names. Rate limiting is enabled with `storage: "database"` (adds the `RateLimit` model).
+- After adding/changing plugins, re-run: `bunx @better-auth/cli generate --config src/lib/auth.ts --output prisma/schema.prisma --yes` then `bunx prisma migrate dev --name <name>` + `bunx prisma generate` (the `prisma-client` generator is NOT run by `migrate dev` alone).
 - Verify: `GET /api/auth/ok` → `{"ok":true}`.
-- Route gating: `(private)/layout.tsx` checks `auth.api.getSession({ headers: await headers() })` and `redirect("/sign-in")`. Layout checks don't re-run on client navigation — use a `proxy.ts` (Next 16 middleware) optimistic check or per-page checks for hardened gating.
+- `bun run migrate` runs `prisma migrate dev` which PROMPTS for a migration name when schema changed — hang in non-interactive shells. Use `bunx prisma migrate dev --name <name>` instead.
+- Admin plugin is enabled (`plugins: [admin(), nextCookies()]`). Schema adds `role`/`banned`/`banReason`/`banExpires` on User. If re-running the CLI generate reverts `role` to nullable/`banned` optional, re-apply the non-null defaults by hand (managed fields).
+- Better Auth config uses model names (`@@map`), not table names. Rate limiting is enabled with `storage: "database"` (adds the `RateLimit` model).
+- Route gating: `(private)/layout.tsx` checks `auth.api.getSession({ headers: await headers() })` and `redirect("/sign-in")`, and `src/proxy.ts` (Next 16 proxy) does the optimistic gate: no session cookie on `/dashboard`|`/admin` → `/sign-in`; valid session on `/sign-in`|`/sign-up` → `/dashboard`; `/admin` without `role === "admin"` → `/dashboard`. Add future private pages to `PRIVATE_PATHS` in `proxy.ts`. Layout checks don't re-run on client navigation, so the proxy carries the redirect.
 - Emails: `sendResetPassword` currently logs the reset URL via `console.log` (mock). Swap for a real provider when one is added.
 
 ## Key restrictions
