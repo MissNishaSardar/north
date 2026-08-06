@@ -53,6 +53,13 @@ const toDateInputValue = (value: Date | string | null | undefined) => {
   return value;
 };
 
+const todayInputValue = () => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+};
+
 const TaskDialog = ({
   task = null,
   trigger,
@@ -202,6 +209,7 @@ const TaskDialog = ({
                     {...field}
                     id={field.name}
                     type="date"
+                    min={todayInputValue()}
                   />
                 </Field>
               )}
