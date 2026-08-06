@@ -59,6 +59,14 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 
 `public/uploads/*` + `!public/uploads/.gitkeep` — ignores all uploaded files but keeps empty dir tracked via `.gitkeep`. Do not add `public/uploads/` itself to gitignore.
 
+## Better Auth
+
+- `src/lib/auth.ts` uses `prismaAdapter` from `better-auth/adapters/prisma` with the existing `dbClient` singleton (libSQL driver adapter). Do NOT use raw `bun:sqlite`/`new Database()` — creates a separate DB and breaks the Prisma singleton.
+- Env via `serverEnv`: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (normalized without trailing slash). Never hardcode `baseURL` in auth.ts.
+- After adding/changing plugins, re-run: `bunx @better-auth/cli generate --config src/lib/auth.ts --output prisma/schema.prisma --yes` then `bun run migrate` (migrate script already runs `prisma generate` — required with the `prisma-client` generator; `migrate dev` alone does NOT regenerate it).
+- Better Auth config uses model names (`@@map`), not table names. Rate limiting is enabled with `storage: "database"` (adds the `RateLimit` model).
+- Verify: `GET /api/auth/ok` → `{"ok":true}`.
+
 ## Key restrictions
 
 - **ESLint**: Locked at eslint@9.x until `eslint-plugin-react` ships v10 support. Do NOT bump.
