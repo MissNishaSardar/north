@@ -54,3 +54,14 @@ export const resetPasswordSchema = z
     }
   });
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>;
+
+export const taskSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, { error: "Title is required" })
+    .max(100, { error: "Title must be 100 characters or fewer" }),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  dueDate: z.string().optional(),
+});
+export type taskType = z.infer<typeof taskSchema>;

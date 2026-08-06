@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import SignOutButton from "@/components/Auth/SignOutButton";
+import TaskDialog from "@/components/TaskDialog";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ const DashboardPage = async () => {
       <p className="text-muted-foreground">
         Welcome, {session?.user.name}. Your tasks will appear here soon.
       </p>
+      <TaskDialog />
       <SignOutButton />
     </main>
   );
