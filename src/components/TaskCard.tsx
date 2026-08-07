@@ -11,6 +11,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import TaskDialog from "@/components/TaskDialog";
+import { Badge } from "@/components/shadcnui/badge";
 import { Button } from "@/components/shadcnui/button";
 import { cn } from "@/lib/utils";
 import { BoardTask } from "@/lib/types";
@@ -24,6 +25,13 @@ const priorityIcon = {
 const stopPropagation = (event: React.SyntheticEvent) => {
   event.stopPropagation();
 };
+
+const startOfToday = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+};
+
+const DUE_SOON_DAYS = 3;
 
 const TaskCard = ({
   task,
@@ -42,7 +50,14 @@ const TaskCard = ({
   } = useSortable({ id: task.id });
 
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-  const isOverdue = dueDate !== null && dueDate < new Date();
+  const isDone = task.status === "DONE";
+  const isOverdue = dueDate !== null && !isDone && dueDate < startOfToday();
+
+  const dueSoonEnd = startOfToday();
+  dueSoonEnd.setDate(dueSoonEnd.getDate() + DUE_SOON_DAYS);
+
+  const isDueSoon =
+    dueDate !== null && !isDone && !isOverdue && dueDate <= dueSoonEnd;
 
   const { icon: PriorityIcon, className: priorityClass } =
     priorityIcon[task.priority];
@@ -68,6 +83,7 @@ const TaskCard = ({
             task={{
               id: task.id,
               title: task.title,
+              description: task.description,
               priority: task.priority,
               dueDate: task.dueDate,
             }}
@@ -99,6 +115,11 @@ const TaskCard = ({
           </Button>
         </div>
       </div>
+      {task.description && (
+        <p className="line-clamp-2 text-xs text-muted-foreground break-words">
+          {task.description}
+        </p>
+      )}
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span
           className={cn(
@@ -121,6 +142,20 @@ const TaskCard = ({
           </span>
         )}
       </div>
+      {(isOverdue || isDueSoon) && (
+        <div className="flex items-center gap-2">
+          {isOverdue && (
+            <Badge variant="destructive">
+              Overdue
+            </Badge>
+          )}
+          {isDueSoon && (
+            <Badge className="border-amber-500/40 bg-amber-500/10 text-amber-600 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-400">
+              Due soon
+            </Badge>
+          )}
+        </div>
+      )}
     </div>
   );
 };

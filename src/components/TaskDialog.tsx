@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/shadcnui/select";
 import { Spinner } from "@/components/shadcnui/spinner";
+import { Textarea } from "@/components/shadcnui/textarea";
 import { toast } from "@/components/shadcnui/toast";
 import { createTask, deleteTask, updateTask } from "@/actions/task";
 import { taskSchema, taskType } from "@/lib/zodSchema";
@@ -37,6 +38,7 @@ import { taskSchema, taskType } from "@/lib/zodSchema";
 export type TaskDialogTask = {
   id: string;
   title: string;
+  description?: string | null;
   priority: taskType["priority"];
   dueDate?: Date | string | null;
 };
@@ -78,6 +80,7 @@ const TaskDialog = ({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: "",
+      description: "",
       priority: "MEDIUM",
       dueDate: "",
     },
@@ -88,6 +91,7 @@ const TaskDialog = ({
     if (open) {
       reset({
         title: task?.title ?? "",
+        description: task?.description ?? "",
         priority: task?.priority ?? "MEDIUM",
         dueDate: toDateInputValue(task?.dueDate),
       });
@@ -169,6 +173,25 @@ const TaskDialog = ({
                     {...field}
                     id={field.name}
                     placeholder="e.g. Write release notes"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="description"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                  <Textarea
+                    {...field}
+                    id={field.name}
+                    rows={3}
+                    placeholder="Add more context (optional)"
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (

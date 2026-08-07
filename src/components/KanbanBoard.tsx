@@ -29,6 +29,7 @@ const KanbanBoard = async () => {
         .map((task) => ({
           id: task.id,
           title: task.title,
+          description: task.description,
           priority: task.priority,
           status: task.status,
           dueDate: task.dueDate?.toISOString() ?? null,

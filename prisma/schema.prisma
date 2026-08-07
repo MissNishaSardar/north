@@ -106,16 +106,17 @@ enum Priority {
 }
 
 model Task {
-  id        String   @id @default(cuid())
-  title     String
-  status    Status   @default(TODO)
-  priority  Priority @default(MEDIUM)
-  dueDate   DateTime?
-  order     Int      @default(0)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      Status   @default(TODO)
+  priority    Priority @default(MEDIUM)
+  dueDate     DateTime?
+  order       Int      @default(0)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([userId])
   @@map("task")

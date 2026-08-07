@@ -30,6 +30,9 @@ const parseDueDate = (value: string | null | undefined): Date | null => {
   return new Date(value);
 };
 
+const nullIfEmpty = (value: string | null | undefined): string | null =>
+  value?.trim() ? value.trim() : null;
+
 export async function createTask(data: taskType) {
   const userId = await getTaskUserId();
   const parsed = taskSchema.safeParse(data);
@@ -40,7 +43,7 @@ export async function createTask(data: taskType) {
     );
   }
 
-  const { title, priority, dueDate } = parsed.data;
+  const { title, description, priority, dueDate } = parsed.data;
   const { _max } = await prisma.task.aggregate({
     where: { userId },
     _max: { order: true },
@@ -50,6 +53,7 @@ export async function createTask(data: taskType) {
   const task = await prisma.task.create({
     data: {
       title,
+      description: nullIfEmpty(description),
       priority,
       dueDate: parseDueDate(dueDate),
       order,
@@ -72,11 +76,12 @@ export async function updateTask(id: string, data: taskType) {
     );
   }
 
-  const { title, priority, dueDate } = parsed.data;
+  const { title, description, priority, dueDate } = parsed.data;
   const task = await prisma.task.updateMany({
     where: { id, userId },
     data: {
       title,
+      description: nullIfEmpty(description),
       priority,
       dueDate: parseDueDate(dueDate),
     },

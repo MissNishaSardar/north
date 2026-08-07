@@ -73,6 +73,11 @@ export const taskSchema = z.object({
     .trim()
     .min(1, { error: "Title is required" })
     .max(100, { error: "Title must be 100 characters or fewer" }),
+  description: z
+    .string()
+    .trim()
+    .max(1000, { error: "Description must be 1000 characters or fewer" })
+    .optional(),
   priority: taskPrioritySchema,
   dueDate: dueDateSchema,
 });
