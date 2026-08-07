@@ -2,14 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Route } from "next";
 import { useState } from "react";
 import { useFilePicker } from "use-file-picker";
-import {
-  CameraIcon,
-  LayoutDashboardIcon,
-  LogOutIcon,
-} from "lucide-react";
+import { CameraIcon, LogOutIcon } from "lucide-react";
+import ThemeToggleButton from "@/components/Layout/ThemeToggleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcnui/avatar";
 import {
   DropdownMenu,
@@ -98,49 +94,41 @@ const Navbar = ({ user }: { user: NavbarUser }) => {
           North
         </Link>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            aria-label="Open user menu"
-            className="rounded-full transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50">
-            <Avatar>
-              <AvatarImage src={user.image ?? undefined} alt={user.name} />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <p className="text-sm font-medium text-foreground">{user.name}</p>
-              <p className="mt-0.5 text-xs font-normal text-muted-foreground">
-                {user.email}
-              </p>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={openFilePicker} disabled={uploading}>
-                <CameraIcon />
-                {uploading ? "Uploading…" : "Change Avatar"}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            {user.role === "admin" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => router.push("/admin" as Route)}>
-                    <LayoutDashboardIcon />
-                    Admin Dashboard
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
-                <LogOutIcon />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <ThemeToggleButton />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label="Open user menu"
+              className="rounded-full transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50">
+              <Avatar>
+                <AvatarImage src={user.image ?? undefined} alt={user.name} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <p className="text-sm font-medium text-foreground">{user.name}</p>
+                <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                  {user.email}
+                </p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={openFilePicker} disabled={uploading}>
+                  <CameraIcon />
+                  {uploading ? "Uploading…" : "Change Avatar"}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+                  <LogOutIcon />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

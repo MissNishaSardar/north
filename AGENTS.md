@@ -78,6 +78,8 @@ public/uploads/     # User uploads (all files ignored except .gitkeep)
 
 - **ESLint**: Locked at eslint@9.x until `eslint-plugin-react` ships v10 support. Do NOT bump.
 - **TypeScript**: Currently ^5.9. TS 7.0 (Go-native compiler) blocked until typescript-eslint API stabilizes (~Oct 2026). Do not migrate.
+- **shadcn `use-mobile` hook**: The shipped version calls `setState` synchronously in `useEffect` and fails the `react-hooks/set-state-in-effect` rule (reactCompiler project). Keep the local fix in `src/hooks/use-mobile.ts` (lazy `useState` initializer + `mql.matches` in the change listener). A `shadcn add sidebar` update will overwrite it — re-apply the fix.
+- **Sidebar nav items**: With `typedRoutes`, array literals (incl. conditional spreads) widen `url` to `string` and fail `tsc`. Annotate items with an explicit type (`url: Route`, `icon: LucideIcon`) and build the array with conditional `push`.
 
 ## Form patterns
 
