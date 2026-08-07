@@ -31,7 +31,7 @@ const AdminPage = async () => {
           Manage roles and bans across the workspace.
         </p>
       </div>
-      <AdminUserTable users={users} />
+      <AdminUserTable users={users} currentUserId={session.user.id} />
     </main>
   );
 };
