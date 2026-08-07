@@ -15,6 +15,7 @@ import { Button } from "@/components/shadcnui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -130,44 +131,48 @@ const AdminUserTable = ({ users }: { users: AdminUser[] }) => {
                     <MoreHorizontalIcon />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        run(
-                          user.id,
-                          () => toggleUserRole(user.id),
-                          user.role === "admin"
-                            ? "Role changed to user"
-                            : "Role changed to admin"
-                        )
-                      }
-                      disabled={pendingId === user.id}
-                    >
-                      {user.role === "admin" ? (
-                        <ShieldIcon />
-                      ) : (
-                        <ShieldCheckIcon />
-                      )}
-                      {user.role === "admin" ? "Make User" : "Make Admin"}
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          run(
+                            user.id,
+                            () => toggleUserRole(user.id),
+                            user.role === "admin"
+                              ? "Role changed to user"
+                              : "Role changed to admin"
+                          )
+                        }
+                        disabled={pendingId === user.id}
+                      >
+                        {user.role === "admin" ? (
+                          <ShieldIcon />
+                        ) : (
+                          <ShieldCheckIcon />
+                        )}
+                        {user.role === "admin" ? "Make User" : "Make Admin"}
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant={user.banned ? "default" : "destructive"}
-                      onClick={() =>
-                        run(
-                          user.id,
-                          () => toggleBanStatus(user.id),
-                          user.banned ? "User unbanned" : "User banned"
-                        )
-                      }
-                      disabled={pendingId === user.id}
-                    >
-                      {user.banned ? (
-                        <UserRoundCheckIcon />
-                      ) : (
-                        <BanIcon />
-                      )}
-                      {user.banned ? "Unban User" : "Ban User"}
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        variant={user.banned ? "default" : "destructive"}
+                        onClick={() =>
+                          run(
+                            user.id,
+                            () => toggleBanStatus(user.id),
+                            user.banned ? "User unbanned" : "User banned"
+                          )
+                        }
+                        disabled={pendingId === user.id}
+                      >
+                        {user.banned ? (
+                          <UserRoundCheckIcon />
+                        ) : (
+                          <BanIcon />
+                        )}
+                        {user.banned ? "Unban User" : "Ban User"}
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

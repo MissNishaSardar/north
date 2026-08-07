@@ -4,7 +4,8 @@ const emailSchema = z.email({ error: "Enter a valid email address" });
 
 const passwordSchema = z
   .string()
-  .min(8, { error: "Password must be at least 8 characters" });
+  .min(12, { error: "Password must be at least 12 characters" })
+  .max(128, { error: "Password must be 128 characters or fewer" });
 
 export const signinSchema = z.object({
   email: emailSchema,
@@ -61,6 +62,11 @@ export type taskPriorityType = z.infer<typeof taskPrioritySchema>;
 export const taskStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE"]);
 export type taskStatusType = z.infer<typeof taskStatusSchema>;
 
+const dueDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Due date must be a valid date" })
+  .optional();
+
 export const taskSchema = z.object({
   title: z
     .string()
@@ -68,6 +74,6 @@ export const taskSchema = z.object({
     .min(1, { error: "Title is required" })
     .max(100, { error: "Title must be 100 characters or fewer" }),
   priority: taskPrioritySchema,
-  dueDate: z.string().optional(),
+  dueDate: dueDateSchema,
 });
 export type taskType = z.infer<typeof taskSchema>;

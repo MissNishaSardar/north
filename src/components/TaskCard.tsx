@@ -17,7 +17,7 @@ import { BoardTask } from "@/lib/types";
 
 const priorityIcon = {
   HIGH: { icon: ArrowUpIcon, className: "text-destructive" },
-  MEDIUM: { icon: MinusIcon, className: "text-blue-500" },
+  MEDIUM: { icon: MinusIcon, className: "text-priority-medium" },
   LOW: { icon: ArrowDownIcon, className: "text-muted-foreground" },
 } as const;
 
@@ -80,7 +80,7 @@ const TaskCard = ({
                 onPointerDown={stopPropagation}
                 onClick={stopPropagation}
               >
-                <PencilIcon className="size-4" />
+                <PencilIcon />
               </Button>
             }
           />
@@ -95,7 +95,7 @@ const TaskCard = ({
               void onDelete(task.id);
             }}
           >
-            <TrashIcon className="size-4 text-destructive" />
+            <TrashIcon className="text-destructive" />
           </Button>
         </div>
       </div>

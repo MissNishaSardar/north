@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcnui/avata
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -114,24 +115,30 @@ const Navbar = ({ user }: { user: NavbarUser }) => {
               </p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={openFilePicker} disabled={uploading}>
-              <CameraIcon />
-              {uploading ? "Uploading…" : "Change Avatar"}
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={openFilePicker} disabled={uploading}>
+                <CameraIcon />
+                {uploading ? "Uploading…" : "Change Avatar"}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             {user.role === "admin" && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/admin" as Route)}>
-                  <LayoutDashboardIcon />
-                  Admin Dashboard
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => router.push("/admin" as Route)}>
+                    <LayoutDashboardIcon />
+                    Admin Dashboard
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
-              <LogOutIcon />
-              Sign out
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+                <LogOutIcon />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

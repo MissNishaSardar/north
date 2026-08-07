@@ -35,7 +35,7 @@ const KanbanColumn = ({
             "size-2 rounded-full",
             status === "TODO" && "bg-muted-foreground",
             status === "IN_PROGRESS" && "bg-primary",
-            status === "DONE" && "bg-emerald-500"
+            status === "DONE" && "bg-success"
           )}
         />
         <h2 className="text-sm font-medium">{BOARD_STATUS_LABEL[status]}</h2>

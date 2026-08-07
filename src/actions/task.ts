@@ -118,41 +118,51 @@ export async function updateTaskOrder(
     throw new Error("Invalid task position");
   }
 
-  const columnTasks = await prisma.task.findMany({
-    where: { userId },
+  const moved = await prisma.task.findFirst({
+    where: { id: taskId, userId },
     select: { id: true, status: true, order: true },
   });
-
-  const moved = columnTasks.find((task) => task.id === taskId);
 
   if (!moved) {
     throw new Error("Task not found");
   }
 
-  const remaining = columnTasks.filter((task) => task.id !== taskId);
-  const columns: Record<taskStatusType, (typeof columnTasks)[number][]> = {
+  const sourceStatus = moved.status as taskStatusType;
+  const targetStatus = parsedStatus.data;
+  const affectedStatuses = Array.from(new Set([sourceStatus, targetStatus]));
+
+  const affectedTasks = await prisma.task.findMany({
+    where: { userId, status: { in: affectedStatuses } },
+    select: { id: true, status: true, order: true },
+  });
+
+  const columns: Record<taskStatusType, typeof affectedTasks> = {
     TODO: [],
     IN_PROGRESS: [],
     DONE: [],
   };
 
-  for (const task of remaining) {
-    columns[task.status as taskStatusType].push(task);
+  for (const task of affectedTasks) {
+    if (task.id !== taskId) {
+      columns[task.status as taskStatusType].push(task);
+    }
   }
 
-  columns[parsedStatus.data].splice(
-    Math.min(parsedIndex.data, columns[parsedStatus.data].length),
+  const targetColumn = columns[targetStatus];
+  targetColumn.splice(
+    Math.min(parsedIndex.data, targetColumn.length),
     0,
-    { ...moved, status: parsedStatus.data }
+    { ...moved, status: targetStatus }
   );
 
-  const updates = (
-    Object.entries(columns) as [taskStatusType, (typeof columnTasks)[number][]][]
-  ).flatMap(([status, tasks]) =>
-    tasks.map((task, index) =>
+  const updates = affectedStatuses.flatMap((status) =>
+    columns[status].map((task, index) =>
       prisma.task.update({
         where: { id: task.id },
-        data: { status, order: index },
+        data:
+          task.id === taskId
+            ? { status, order: index }
+            : { order: index },
       })
     )
   );

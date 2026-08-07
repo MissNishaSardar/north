@@ -1,20 +1,30 @@
 import { ClipboardListIcon } from "lucide-react";
 import TaskDialog from "@/components/TaskDialog";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/shadcnui/empty";
 
 const KanbanEmptyState = () => {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed p-12 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-        <ClipboardListIcon className="size-6 text-muted-foreground" />
-      </div>
-      <div className="flex flex-col gap-1">
-        <h2 className="font-heading text-lg font-semibold">No tasks yet</h2>
-        <p className="text-sm text-muted-foreground">
+    <Empty className="border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <ClipboardListIcon />
+        </EmptyMedia>
+        <EmptyTitle>No tasks yet</EmptyTitle>
+        <EmptyDescription>
           Create your first task to get started.
-        </p>
-      </div>
-      <TaskDialog />
-    </div>
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <TaskDialog />
+      </EmptyContent>
+    </Empty>
   );
 };
 
