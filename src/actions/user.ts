@@ -5,8 +5,80 @@ import { headers } from "next/headers";
 import sharp from "sharp";
 import prisma from "@/lib/dbClient/prisma";
 import { auth } from "@/lib/auth";
+import {
+  changePasswordSchema,
+  changePasswordType,
+  deleteAccountSchema,
+  deleteAccountType,
+  profileSchema,
+} from "@/lib/zodSchema";
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+
+export async function updateProfileName(name: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const parsed = profileSchema.safeParse({ name });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid name");
+  }
+
+  await auth.api.updateUser({
+    headers: await headers(),
+    body: { name: parsed.data.name },
+  });
+
+  revalidatePath("/profile");
+}
+
+export async function changeProfilePassword(data: changePasswordType) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const parsed = changePasswordSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid password");
+  }
+
+  await auth.api.changePassword({
+    headers: await headers(),
+    body: {
+      currentPassword: parsed.data.currentPassword,
+      newPassword: parsed.data.newPassword,
+      revokeOtherSessions: true,
+    },
+  });
+}
+
+export async function deleteAccount(data: deleteAccountType) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const parsed = deleteAccountSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid password");
+  }
+
+  await auth.api.deleteUser({
+    headers: await headers(),
+    body: { password: parsed.data.password },
+  });
+
+  revalidatePath("/profile", "layout");
+}
 
 export async function uploadAvatar(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -38,10 +110,13 @@ export async function uploadAvatar(formData: FormData) {
     .jpeg({ quality: 97 })
     .toFile(`public/uploads/${filename}`);
 
+  const version = Date.now();
+
   await prisma.user.update({
     where: { id: userId },
-    data: { image: `/uploads/${filename}` },
+    data: { image: `/uploads/${filename}?v=${version}` },
   });
 
+  revalidatePath("/profile");
   revalidatePath("/dashboard");
 }

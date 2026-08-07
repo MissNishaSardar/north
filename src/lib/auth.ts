@@ -21,6 +21,11 @@ export const auth = betterAuth({
       console.log(`[auth] Password reset for ${user.email}: ${url}`);
     },
   },
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
   rateLimit: {
     enabled: true,
     storage: "database",

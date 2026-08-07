@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useFilePicker } from "use-file-picker";
-import { CameraIcon, LogOutIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import ThemeToggleButton from "@/components/Layout/ThemeToggleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcnui/avatar";
 import {
@@ -16,8 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcnui/dropdown-menu";
-import { toast } from "@/components/shadcnui/toast";
-import { uploadAvatar } from "@/actions/user";
 import { authClient } from "@/lib/auth-client";
 
 type NavbarUser = {
@@ -27,51 +22,7 @@ type NavbarUser = {
   role?: string | null;
 };
 
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
-
 const Navbar = ({ user }: { user: NavbarUser }) => {
-  const router = useRouter();
-  const [uploading, setUploading] = useState(false);
-
-  const { openFilePicker } = useFilePicker({
-    accept: "image/*",
-    multiple: false,
-    readFilesContent: false,
-    onFilesSelected: async ({ plainFiles }) => {
-      const file = plainFiles?.[0];
-
-      if (!file) {
-        return;
-      }
-
-      if (!file.type.startsWith("image/")) {
-        toast.add({ title: "Invalid file", type: "error", description: "Please choose an image file." });
-        return;
-      }
-
-      if (file.size > MAX_AVATAR_SIZE) {
-        toast.add({ title: "Image too large", type: "error", description: "Maximum size is 5MB." });
-        return;
-      }
-
-      setUploading(true);
-
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        await uploadAvatar(formData);
-        toast.add({ title: "Avatar updated", type: "success" });
-        router.refresh();
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Something went wrong.";
-        toast.add({ title: "Upload failed", type: "error", description: message });
-      } finally {
-        setUploading(false);
-      }
-    },
-  });
-
   const handleSignOut = async () => {
     await authClient.signOut();
     window.location.href = "/sign-in";
@@ -112,13 +63,6 @@ const Navbar = ({ user }: { user: NavbarUser }) => {
                   {user.email}
                 </p>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={openFilePicker} disabled={uploading}>
-                  <CameraIcon />
-                  {uploading ? "Uploading…" : "Change Avatar"}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem variant="destructive" onClick={handleSignOut}>

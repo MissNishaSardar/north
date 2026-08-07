@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { auth } from "@/lib/auth";
 
-const PRIVATE_PATHS = new Set(["/dashboard", "/admin"]);
+const PRIVATE_PATHS = new Set(["/dashboard", "/admin", "/profile"]);
 const AUTH_PATHS = new Set(["/sign-in", "/sign-up"]);
 
 export async function proxy(request: NextRequest) {

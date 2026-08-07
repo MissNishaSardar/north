@@ -77,3 +77,54 @@ export const taskSchema = z.object({
   dueDate: dueDateSchema,
 });
 export type taskType = z.infer<typeof taskSchema>;
+
+export const banDurationSchema = z.enum(["permanent", "1d", "7d", "30d"]);
+export type banDurationType = z.infer<typeof banDurationSchema>;
+
+export const profileSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: "Name is required" })
+    .max(50, { error: "Name must be 50 characters or fewer" }),
+});
+export type profileType = z.infer<typeof profileSchema>;
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, { error: "Current password is required" }),
+    newPassword: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "Passwords do not match",
+      });
+    }
+    if (data.newPassword === data.currentPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["newPassword"],
+        message: "New password must be different from your current password",
+      });
+    }
+  });
+export type changePasswordType = z.infer<typeof changePasswordSchema>;
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, { error: "Password is required" }),
+});
+export type deleteAccountType = z.infer<typeof deleteAccountSchema>;
+
+export const banSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .min(1, { error: "Reason is required" })
+    .max(200, { error: "Reason must be 200 characters or fewer" }),
+  duration: banDurationSchema,
+});
+export type banType = z.infer<typeof banSchema>;

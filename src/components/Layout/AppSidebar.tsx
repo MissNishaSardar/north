@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { LayoutDashboardIcon, ShieldCheckIcon, type LucideIcon } from "lucide-react";
+import { LayoutDashboardIcon, ShieldCheckIcon, UserRoundIcon, type LucideIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +36,7 @@ const AppSidebar = ({ user }: { user: AppSidebarUser }) => {
 
   const items: NavItem[] = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
+    { title: "Profile", url: "/profile", icon: UserRoundIcon },
   ];
 
   if (user.role === "admin") {
