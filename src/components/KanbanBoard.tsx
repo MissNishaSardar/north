@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import KanbanEmptyState from "@/components/KanbanEmptyState";
 import TaskDialog from "@/components/TaskDialog";
 import DndWrapper from "@/components/DndWrapper";
 import { auth } from "@/lib/auth";
@@ -44,10 +45,14 @@ const KanbanBoard = async () => {
         <h1 className="font-heading text-2xl font-semibold">Dashboard</h1>
         <TaskDialog />
       </div>
-      <DndWrapper
-        key={tasks.map((task) => `${task.id}:${task.order}:${task.status}`).join("|")}
-        columns={columns}
-      />
+      {tasks.length === 0 ? (
+        <KanbanEmptyState />
+      ) : (
+        <DndWrapper
+          key={tasks.map((task) => `${task.id}:${task.order}:${task.status}`).join("|")}
+          columns={columns}
+        />
+      )}
     </div>
   );
 };
