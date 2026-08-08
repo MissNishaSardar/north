@@ -57,12 +57,14 @@ const Navbar = ({ user }: { user: NavbarUser }) => {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <p className="text-sm font-medium text-foreground">{user.name}</p>
-                <p className="mt-0.5 text-xs font-normal text-muted-foreground">
-                  {user.email}
-                </p>
-              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>
+                  <p className="text-sm font-medium text-foreground">{user.name}</p>
+                  <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                    {user.email}
+                  </p>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem variant="destructive" onClick={handleSignOut}>

@@ -116,10 +116,24 @@ const ProfileDetailsForm = ({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <Avatar className="size-16">
-          <AvatarImage src={user.image ?? undefined} alt={user.name} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+        <button
+          type="button"
+          onClick={openFilePicker}
+          disabled={uploading}
+          aria-label="Change avatar"
+          className="group relative rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Avatar className="size-16">
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            {uploading ? (
+              <Spinner className="size-5" />
+            ) : (
+              <CameraIcon className="size-5" />
+            )}
+          </span>
+        </button>
         <div className="flex flex-col gap-2">
           <Button
             type="button"
@@ -132,7 +146,7 @@ const ProfileDetailsForm = ({
             ) : (
               <CameraIcon data-icon="inline-start" />
             )}
-            {uploading ? "Uploading…" : "Change avatar"}
+            {uploading ? "Uploading." : "Change avatar"}
           </Button>
           <p className="text-xs text-muted-foreground">
             JPG or PNG, up to 5MB. Cropped to a square.
